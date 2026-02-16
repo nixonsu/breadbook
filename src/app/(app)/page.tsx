@@ -28,8 +28,8 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <div className="rounded-lg bg-white p-8 shadow-lg dark:bg-zinc-800">
+    <div>
+      <div>
         {user ? (
           <p className="text-gray-600 dark:text-gray-400">
             Hello, {user.firstName}! Your email is {user.email}.
