@@ -36,16 +36,11 @@ export default function CardBalancePage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
+    <div>
       <div className="absolute top-4 left-4">
-        <Link
-          href="/"
-          className="rounded bg-gray-200 px-3 py-1 text-sm text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-        >
-          Back
-        </Link>
+        <Link href="/">Back</Link>
       </div>
-      <div className="rounded-lg bg-white p-8 shadow-lg dark:bg-zinc-800">
+      <div>
         {balances ? (
           <div>
             <form onSubmit={handleSubmit} className="mt-4">
