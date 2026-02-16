@@ -1,0 +1,78 @@
+"use client";
+
+import { API_ROUTES } from "@/src/constants/api-routes";
+import { Balances } from "@/src/features/balances/balances";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+export default function CardBalancePage() {
+  const [balances, setBalances] = useState<Balances | null>(null);
+
+  useEffect(() => {
+    async function fetchBalances() {
+      const res = await fetch(API_ROUTES.BALANCES);
+      const balances = await res.json();
+      setBalances(balances);
+    }
+
+    fetchBalances();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const total = formData.get("total");
+
+    if (typeof total === "string") {
+      await fetch(API_ROUTES.BALANCES_CARD, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ total: parseFloat(total) }),
+      });
+    }
+
+    const res = await fetch(API_ROUTES.BALANCES);
+    const updatedBalances = await res.json();
+    setBalances(updatedBalances);
+  };
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
+      <div className="absolute top-4 left-4">
+        <Link
+          href="/"
+          className="rounded bg-gray-200 px-3 py-1 text-sm text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+        >
+          Back
+        </Link>
+      </div>
+      <div className="rounded-lg bg-white p-8 shadow-lg dark:bg-zinc-800">
+        {balances ? (
+          <div>
+            <p className="text-gray-600 dark:text-gray-400">
+              Current Card Balance: ${balances.cardBalance.total}
+            </p>
+            <form onSubmit={handleSubmit} className="mt-4">
+              <input
+                type="number"
+                name="total"
+                placeholder="New Card Balance"
+                className="mt-2 rounded border px-4 py-2"
+              />
+              <button
+                type="submit"
+                className="mt-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+              >
+                Update Card Balance
+              </button>
+            </form>
+          </div>
+        ) : (
+          <p className="text-gray-600 dark:text-gray-400">
+            Loading balances...
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}

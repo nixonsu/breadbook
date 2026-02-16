@@ -3,6 +3,7 @@
 import { User } from "@/generated/prisma/client";
 import { API_ROUTES } from "@/src/constants/api-routes";
 import { Balances } from "@/src/features/balances/balances";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function Home() {
@@ -39,10 +40,18 @@ export default function Home() {
           </p>
         )}
         {balances ? (
-          <div className="mt-4 text-gray-600 dark:text-gray-400">
-            <p>Card Balance: ${balances.cardBalance.total}</p>
-            <p>Cash Balance: ${balances.cashBalance.total}</p>
-            <p>Variance: ${balances.variance}</p>
+          <div>
+            <div className="mt-4 text-gray-600 dark:text-gray-400">
+              <p>Card Balance: ${balances.cardBalance.total}</p>
+              <Link href="/card-balance">Update Card Balance</Link>
+            </div>
+            <div className="mt-4 text-gray-600 dark:text-gray-400">
+              <p>Cash Balance: ${balances.cashBalance.total}</p>
+              <Link href="/cash-balance">Update Cash Balance</Link>
+            </div>
+            <div className="mt-4 text-gray-600 dark:text-gray-400">
+              <p>Variance: ${balances.variance}</p>
+            </div>
           </div>
         ) : (
           <p className="mt-4 text-gray-600 dark:text-gray-400">
