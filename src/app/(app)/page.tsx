@@ -43,11 +43,11 @@ export default function Home() {
           <div>
             <div className="mt-4 text-gray-600 dark:text-gray-400">
               <p>Card Balance: ${balances.cardBalance.total}</p>
-              <Link href="/card-balance">Update Card Balance</Link>
+              <Link href="/card">Update Card Balance</Link>
             </div>
             <div className="mt-4 text-gray-600 dark:text-gray-400">
               <p>Cash Balance: ${balances.cashBalance.total}</p>
-              <Link href="/cash-balance">Update Cash Balance</Link>
+              <Link href="/cash">Update Cash Balance</Link>
             </div>
             <div className="mt-4 text-gray-600 dark:text-gray-400">
               <p>Variance: ${balances.variance}</p>

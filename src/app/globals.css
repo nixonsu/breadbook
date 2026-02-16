@@ -18,8 +18,14 @@
   }
 }
 
+html,
+body {
+  height: 100%;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-public-sans);
+  overscroll-behavior-y: none; /* stops weird pull-to-refresh scroll */
 }
