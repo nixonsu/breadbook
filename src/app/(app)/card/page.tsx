@@ -1,9 +1,11 @@
 "use client";
 
+import Button from "@/src/components/Button";
+import Card from "@/src/components/Card";
 import Input from "@/src/components/Input";
 import { API_ROUTES } from "@/src/constants/api-routes";
 import { Balances } from "@/src/features/balances/balances";
-import Link from "next/link";
+import { ArrowFatLeftIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 
 export default function CardBalancePage() {
@@ -20,9 +22,7 @@ export default function CardBalancePage() {
     fetchBalances();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
+  const handleSubmit = async () => {
     await fetch(API_ROUTES.BALANCES_CARD, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -36,36 +36,36 @@ export default function CardBalancePage() {
 
   return (
     <div>
-      <div className="absolute top-4 left-4">
-        <Link href="/">Back</Link>
-      </div>
-      <div>
-        {balances ? (
-          <div>
-            <p className="text-gray-600 dark:text-gray-400">
-              Current Card Balance: ${balances.cardBalance.total}
-            </p>
-            <form onSubmit={handleSubmit} className="mt-4">
-              <Input
-                value={cardBalanceInput?.toString() || ""}
-                type="number"
-                placeholder="Ooo update me"
-                onChange={(value) =>
-                  setCardBalanceInput(parseFloat(value) || 0)
-                }
-              />
-              <button
-                type="submit"
-                className="mt-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-              >
-                Update Card Balance
-              </button>
-            </form>
+      <div className="w-full">
+        {/* Back button */}
+        <div className="absolute top-4 left-4">
+          <ArrowFatLeftIcon
+            onClick={() => window.history.back()}
+            weight="fill"
+            size={36}
+          />
+        </div>
+
+        {balances && (
+          <div className="flex flex-col items-center gap-12 mt-48">
+            <Card className="w-full text-center">
+              <h1>
+                <b>card balance: ${balances.cardBalance.total}</b>
+              </h1>
+            </Card>
+
+            <Input
+              value={cardBalanceInput?.toString() || ""}
+              type="number"
+              placeholder="Lemme see that money"
+              onChange={(value) => setCardBalanceInput(parseFloat(value) || 0)}
+              className="w-1/4"
+            />
+
+            <Button color="lime" className="w-1/4" onClick={handleSubmit}>
+              <b>save</b>
+            </Button>
           </div>
-        ) : (
-          <p className="text-gray-600 dark:text-gray-400">
-            Loading balances...
-          </p>
         )}
       </div>
     </div>
