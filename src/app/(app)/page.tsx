@@ -1,14 +1,18 @@
 "use client";
 
 import { User } from "@/generated/prisma/client";
+import Card from "@/src/components/Card";
 import { API_ROUTES } from "@/src/constants/routes";
 import { Balances } from "@/src/features/balances/balances";
+import { CaretRightIcon } from "@phosphor-icons/react/dist/icons/CaretRight";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [balances, setBalances] = useState<Balances | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchUser() {
@@ -27,36 +31,33 @@ export default function Home() {
     fetchBalances();
   }, []);
 
+  const handleCardBalanceClick = () => {
+    router.push("/card");
+  };
+
   return (
     <div>
       <div>
-        {user ? (
-          <p className="text-gray-600 dark:text-gray-400">
-            Hello, {user.firstName}! Your email is {user.email}.
-          </p>
-        ) : (
-          <p className="text-gray-600 dark:text-gray-400">
-            Loading user data...
-          </p>
-        )}
-        {balances ? (
-          <div>
-            <div className="mt-4 text-gray-600 dark:text-gray-400">
+        {user && <h1>Hello, {user.firstName}.</h1>}
+
+        {balances && (
+          <div className="flex flex-col items-center gap-16 mt-16">
+            <Card
+              className="flex items-center justify-between gap-4 cursor-pointer"
+              onClick={handleCardBalanceClick}
+            >
               <p>Card Balance: ${balances.cardBalance.total}</p>
-              <Link href="/card">Update Card Balance</Link>
-            </div>
-            <div className="mt-4 text-gray-600 dark:text-gray-400">
+
+              <CaretRightIcon className="w-4 h-4" weight="fill" size={32} />
+            </Card>
+            <Card>
               <p>Cash Balance: ${balances.cashBalance.total}</p>
               <Link href="/cash">Update Cash Balance</Link>
-            </div>
-            <div className="mt-4 text-gray-600 dark:text-gray-400">
+            </Card>
+            <Card>
               <p>Variance: ${balances.variance}</p>
-            </div>
+            </Card>
           </div>
-        ) : (
-          <p className="mt-4 text-gray-600 dark:text-gray-400">
-            Loading balances...
-          </p>
         )}
       </div>
     </div>

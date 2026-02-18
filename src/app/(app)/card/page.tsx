@@ -53,7 +53,7 @@ export default function CardBalancePage() {
 
         {balances && (
           <div className="flex flex-col items-center gap-12 mt-32">
-            <Card className="w-full text-center">
+            <Card className="w-full flex flex-col items-center">
               <b>I currently have </b>
               <br />
               <Input
