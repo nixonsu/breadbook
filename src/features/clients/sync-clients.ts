@@ -3,8 +3,9 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import "dotenv/config";
 import fs from "fs";
 import Papa from "papaparse";
+import { exit } from "process";
 
-const file = fs.readFileSync("src/features/clients/clients.csv", "utf-8");
+const file = fs.readFileSync("src/features/clients/list (7).csv", "utf-8");
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -108,6 +109,7 @@ async function main() {
   }
 
   console.log("Finished syncing clients");
+  exit(0);
 }
 
 main();
