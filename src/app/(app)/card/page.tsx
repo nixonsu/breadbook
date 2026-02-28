@@ -51,7 +51,7 @@ export default function CardBalancePage() {
           />
         </div>
 
-        {balances && (
+        {balances && cardBalanceInput && (
           <div className="flex flex-col items-center gap-12 mt-32">
             <Card className="w-full flex flex-col items-center">
               <b>I currently have </b>
