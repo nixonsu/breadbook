@@ -3,7 +3,9 @@
 import { Client } from "@/generated/prisma/client";
 import IconButton from "@/src/components/IconButton";
 import Input from "@/src/components/Input";
+import { showToast } from "@/src/components/Toast";
 import { API_ROUTES } from "@/src/constants/routes";
+import { SyncResult } from "@/src/features/clients/client-service";
 import { ArrowsClockwiseIcon } from "@phosphor-icons/react";
 import { useEffect, useMemo, useReducer, useState } from "react";
 
@@ -24,8 +26,16 @@ export default function ClientsPage() {
 
   const handleSync = async () => {
     setSyncing(true);
-    await fetch(API_ROUTES.CLIENTS_SYNC, { method: "POST" });
-    refresh();
+    try {
+      const res = await fetch(API_ROUTES.CLIENTS_SYNC, { method: "POST" });
+      const result: SyncResult = await res.json();
+      refresh();
+      showToast(
+        `Synced ${result.total} clients — ${result.created} created, ${result.updated} updated`,
+      );
+    } catch {
+      showToast("Failed to sync clients", "error");
+    }
     setSyncing(false);
   };
 
