@@ -5,31 +5,27 @@ import IconButton from "@/src/components/IconButton";
 import Input from "@/src/components/Input";
 import { API_ROUTES } from "@/src/constants/routes";
 import { ArrowsClockwiseIcon } from "@phosphor-icons/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useReducer, useState } from "react";
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [search, setSearch] = useState("");
   const [syncing, setSyncing] = useState(false);
-
-  const syncClients = async () => {
-    const res = await fetch(API_ROUTES.CLIENTS_SYNC);
-    const clients: Client[] = await res.json();
-    setClients(clients);
-  };
+  const [refreshKey, refresh] = useReducer((x: number) => x + 1, 0);
 
   useEffect(() => {
-    async function fetchClients() {
+    async function loadClients() {
       const res = await fetch(API_ROUTES.CLIENTS);
       const data: Client[] = await res.json();
       setClients(data);
     }
-    fetchClients();
-  }, []);
+    loadClients();
+  }, [refreshKey]);
 
   const handleSync = async () => {
     setSyncing(true);
-    await syncClients();
+    await fetch(API_ROUTES.CLIENTS_SYNC, { method: "POST" });
+    refresh();
     setSyncing(false);
   };
 

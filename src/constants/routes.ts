@@ -4,6 +4,7 @@ export const API_ROUTES = {
   BALANCES_CARD: "/api/balances/card",
   BALANCES_CASH: "/api/balances/cash",
   CLIENTS: "/api/clients",
+  CLIENTS_SYNC: "/api/clients/sync",
 } as const;
 
 export const UI_ROUTES = {
