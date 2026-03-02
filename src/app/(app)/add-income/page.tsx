@@ -3,8 +3,8 @@
 import { Client } from "@/generated/prisma/client";
 import Button from "@/src/components/Button";
 import CurrencyInput from "@/src/components/CurrencyInput";
-import DropDown from "@/src/components/Dropdown";
 import Input from "@/src/components/Input";
+import Select from "@/src/components/Select";
 import { API_ROUTES, UI_ROUTES } from "@/src/constants/routes";
 import {
   CaretRightIcon,
@@ -66,18 +66,15 @@ export default function AddIncomePage() {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Header */}
       <h1 className="text-2xl font-bold italic">Add income</h1>
 
-      {/* Income type dropdown */}
-      <DropDown
+      <Select
         options={INCOME_TYPE_OPTIONS}
         value={incomeType}
         onChange={setIncomeType}
         placeholder="Select type"
       />
 
-      {/* Client selector */}
       <div className="relative" ref={pickerRef}>
         <button
           type="button"
@@ -95,7 +92,6 @@ export default function AddIncomePage() {
 
         {clientPickerOpen && (
           <div className="absolute left-0 right-0 z-20 mt-2 bg-white border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] max-h-64 flex flex-col">
-            {/* Search bar */}
             <div className="flex items-center gap-2 px-3 py-2 border-b-2 border-black">
               <MagnifyingGlassIcon size={18} />
               <input
@@ -120,7 +116,7 @@ export default function AddIncomePage() {
                 </button>
               )}
             </div>
-            {/* Client list */}
+
             <div className="overflow-y-auto">
               {filteredClients.length === 0 ? (
                 <p className="text-center text-sm text-gray-500 py-4">
@@ -151,27 +147,25 @@ export default function AddIncomePage() {
         )}
       </div>
 
-      {/* Card amount */}
-      <div className="flex items-center gap-3">
-        <label className="text-lg font-medium w-14">Card:</label>
-        <CurrencyInput
-          value={cardAmount}
-          onChange={setCardAmount}
-          className="flex-1! w-full!"
-        />
+      <div className="flex items-center gap-4">
+        <div className="flex-1 flex items-center gap-2">
+          <label className="text-lg font-medium">Card:</label>
+          <CurrencyInput
+            value={cardAmount}
+            onChange={setCardAmount}
+            className="flex-1! w-full!"
+          />
+        </div>
+        <div className="flex-1 flex items-center gap-2">
+          <label className="text-lg font-medium">Cash:</label>
+          <CurrencyInput
+            value={cashAmount}
+            onChange={setCashAmount}
+            className="flex-1! w-full!"
+          />
+        </div>
       </div>
 
-      {/* Cash amount */}
-      <div className="flex items-center gap-3">
-        <label className="text-lg font-medium w-14">Cash:</label>
-        <CurrencyInput
-          value={cashAmount}
-          onChange={setCashAmount}
-          className="flex-1! w-full!"
-        />
-      </div>
-
-      {/* Date */}
       <div className="flex items-center gap-3">
         <label className="text-lg font-medium w-14">Date:</label>
         <input
@@ -182,7 +176,6 @@ export default function AddIncomePage() {
         />
       </div>
 
-      {/* Notes */}
       <div className="flex items-center gap-3">
         <label className="text-lg font-medium w-14">Notes:</label>
         <Input
@@ -193,7 +186,6 @@ export default function AddIncomePage() {
         />
       </div>
 
-      {/* Save button */}
       <Button
         onClick={handleSubmit}
         color="lime"
