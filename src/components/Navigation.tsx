@@ -12,6 +12,7 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 const ICON_SIZE = 32;
 const FANOUT_ANIM_MS = 200;
@@ -88,6 +89,18 @@ export default function Navigation() {
   // TODO: CORRECT COLORS
   return (
     <div className="relative">
+      {/* Backdrop */}
+      {fanoutMounted &&
+        createPortal(
+          <div
+            className={`fixed inset-0 z-40 bg-black/50 transition-opacity duration-200 ${
+              fanoutOpen ? "opacity-100" : "opacity-0"
+            }`}
+            onClick={closeFanout}
+          />,
+          document.body,
+        )}
+
       {/* Fanout */}
       {fanoutMounted && (
         <div className="pointer-events-none fixed bottom-28 left-1/2 z-50 w-[320px] -translate-x-1/2">
