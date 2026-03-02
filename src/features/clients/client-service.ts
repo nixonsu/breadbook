@@ -25,7 +25,12 @@ export interface SyncResult {
 }
 
 export async function syncClients(businessId: number): Promise<SyncResult> {
-  const file = fs.readFileSync("src/features/clients/list (7).csv", "utf-8");
+  let file: string;
+  try {
+    file = fs.readFileSync("src/features/clients/list (7).csv", "utf-8");
+  } catch {
+    throw new Error("Failed to read client CSV file");
+  }
 
   const result: Papa.ParseResult<CsvClient> = Papa.parse(file, {
     header: true,
@@ -41,10 +46,24 @@ export async function syncClients(businessId: number): Promise<SyncResult> {
     },
   });
 
+  if (result.errors.length > 0) {
+    throw new Error(`CSV parsing failed: ${result.errors[0].message}`);
+  }
+
+  if (result.data.length === 0) {
+    throw new Error("CSV file contains no client data");
+  }
+
   let created = 0;
   let updated = 0;
 
   for (const client of result.data) {
+    if (!client.firstName || !client.lastName) {
+      throw new Error(
+        `Invalid client data: missing name for entry "${client.firstName ?? ""} ${client.lastName ?? ""}"`,
+      );
+    }
+
     const existingClient = await prisma.client.findFirst({
       where: {
         firstName: client.firstName,

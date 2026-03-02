@@ -8,8 +8,10 @@ export async function POST(): Promise<Response> {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to sync clients";
     console.error("Failed to sync clients:", error);
-    return new Response(JSON.stringify({ error: "Failed to sync clients" }), {
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });

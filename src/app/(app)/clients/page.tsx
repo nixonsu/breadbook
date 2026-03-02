@@ -26,16 +26,20 @@ export default function ClientsPage() {
 
   const handleSync = async () => {
     setSyncing(true);
-    try {
-      const res = await fetch(API_ROUTES.CLIENTS_SYNC, { method: "POST" });
-      const result: SyncResult = await res.json();
-      refresh();
-      showToast(
-        `Synced ${result.total} clients - ${result.created} created, ${result.updated} updated`,
-      );
-    } catch {
-      showToast("Failed to sync clients", "error");
+    const res = await fetch(API_ROUTES.CLIENTS_SYNC, { method: "POST" });
+    const data = await res.json();
+
+    if (!res.ok) {
+      showToast(data.error || "Failed to sync clients", "error");
+      setSyncing(false);
+      return;
     }
+
+    const result = data as SyncResult;
+    refresh();
+    showToast(
+      `Synced ${result.total} clients - ${result.created} created, ${result.updated} updated`,
+    );
     setSyncing(false);
   };
 
