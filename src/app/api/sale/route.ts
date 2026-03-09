@@ -5,7 +5,7 @@ export async function POST(request: Request): Promise<Response> {
     const { cardAmount, cashAmount, date, notes, clientId } =
       await request.json();
 
-    await createSale(1, clientId, cardAmount, cashAmount, date, notes);
+    await createSale(1, clientId, date, notes, cardAmount, cashAmount);
 
     return new Response(JSON.stringify({ message: "Sale created" }), {
       status: 201,

@@ -12,10 +12,10 @@ const prisma = new PrismaClient({ adapter });
 export async function createSale(
   businessId: number,
   clientId: number,
+  date: string | Date,
+  notes: string,
   cardAmount: number,
   cashAmount: number,
-  date: Date,
-  notes: string,
 ): Promise<Transaction> {
   const transaction = await prisma.transaction.create({
     data: {
@@ -26,7 +26,7 @@ export async function createSale(
       cardAmount,
       cashAmount,
       notes,
-      occurredAt: date,
+      occurredAt: new Date(date),
       updatedAt: new Date(),
     },
   });

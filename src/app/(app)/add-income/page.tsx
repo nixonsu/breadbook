@@ -66,8 +66,8 @@ export default function AddIncomePage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        cardAmount: parseFloat(cardAmount),
-        cashAmount: parseFloat(cashAmount),
+        cardAmount: parseFloat(cardAmount) || 0,
+        cashAmount: parseFloat(cashAmount) || 0,
         date,
         notes,
         clientId: selectedClient?.id,
