@@ -152,7 +152,7 @@ export async function getTransactions(
       occurredAt: { gte: from, lte: to },
     },
     include: { client: true },
-    orderBy: { occurredAt: "desc" },
+    orderBy: [{ occurredAt: "desc" }, { id: "desc" }],
   });
 }
 
