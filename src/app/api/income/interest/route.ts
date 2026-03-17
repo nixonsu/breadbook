@@ -4,8 +4,12 @@ import { z } from "zod";
 
 const interestIncomeSchema = z
   .object({
-    cardAmount: z.number({ error: "Card amount must be a number" }).min(0, "Card amount cannot be negative"),
-    cashAmount: z.number({ error: "Cash amount must be a number" }).min(0, "Cash amount cannot be negative"),
+    cardAmount: z
+      .number({ error: "Card amount must be a number" })
+      .min(0, "Card amount cannot be negative"),
+    cashAmount: z
+      .number({ error: "Cash amount must be a number" })
+      .min(0, "Cash amount cannot be negative"),
     date: z.iso.date({ error: "Please select a date" }),
     notes: z.string(),
   })
@@ -21,7 +25,7 @@ export async function POST(request: Request): Promise<Response> {
 
     await createInterestIncome(1, date, notes, cardAmount, cashAmount);
 
-    return new Response(JSON.stringify({ message: "Interest income created" }), {
+    return new Response(JSON.stringify({ message: "Interest income added" }), {
       status: 201,
       headers: { "Content-Type": "application/json" },
     });
