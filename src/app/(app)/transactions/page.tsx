@@ -12,6 +12,7 @@ import {
   BriefcaseIcon,
   PencilSimpleIcon,
   StorefrontIcon,
+  TrashIcon,
   UserIcon,
   XIcon,
 } from "@phosphor-icons/react";
@@ -106,6 +107,8 @@ export default function TransactionsPage() {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<TransactionDTO | null>(null);
   const [editing, setEditing] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [editDate, setEditDate] = useState("");
   const [editCardAmount, setEditCardAmount] = useState("");
   const [editCashAmount, setEditCashAmount] = useState("");
@@ -114,11 +117,13 @@ export default function TransactionsPage() {
   const openSelected = (tx: TransactionDTO) => {
     setSelected(tx);
     setEditing(false);
+    setConfirmingDelete(false);
   };
 
   const closeSelected = () => {
     setSelected(null);
     setEditing(false);
+    setConfirmingDelete(false);
   };
 
   const startEditing = () => {
@@ -156,6 +161,30 @@ export default function TransactionsPage() {
     setSelected(null);
     setEditing(false);
     fetchTransactions();
+  };
+
+  const handleDelete = async () => {
+    if (!selected) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(API_ROUTES.TRANSACTIONS, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: selected.id }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showToast(data.error || "Failed to delete transaction", "error");
+        return;
+      }
+
+      showToast("Transaction deleted");
+      closeSelected();
+      fetchTransactions();
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const fetchTransactions = useCallback(async () => {
@@ -285,13 +314,22 @@ export default function TransactionsPage() {
               </h2>
               <div className="flex items-center gap-2">
                 {!editing && (
-                  <button
-                    type="button"
-                    onClick={startEditing}
-                    className="cursor-pointer p-1 hover:bg-cyan-100 border-2 border-black"
-                  >
-                    <PencilSimpleIcon size={20} weight="bold" />
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      onClick={startEditing}
+                      className="cursor-pointer p-1 hover:bg-cyan-100 border-2 border-black"
+                    >
+                      <PencilSimpleIcon size={20} weight="bold" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmingDelete(true)}
+                      className="cursor-pointer p-1 hover:bg-red-100 border-2 border-black"
+                    >
+                      <TrashIcon size={20} weight="bold" />
+                    </button>
+                  </>
                 )}
                 <button
                   type="button"
@@ -429,6 +467,33 @@ export default function TransactionsPage() {
                         Notes
                       </p>
                       <p className="text-base">{selected.notes}</p>
+                    </div>
+                  )}
+
+                  {confirmingDelete && (
+                    <div className="border-t-2 border-black pt-3 mt-2 flex items-center justify-between gap-3">
+                      <p className="text-sm font-bold text-red-600">Delete?</p>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => setConfirmingDelete(false)}
+                          color="cyan"
+                          size="sm"
+                          rounded="md"
+                          className="font-semibold"
+                        >
+                          No
+                        </Button>
+                        <Button
+                          onClick={handleDelete}
+                          disabled={deleting}
+                          color="red"
+                          size="sm"
+                          rounded="md"
+                          className="font-semibold"
+                        >
+                          {deleting ? "Deleting..." : "Yes, delete"}
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </>

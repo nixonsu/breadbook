@@ -157,6 +157,10 @@ export async function updateTransaction(
   });
 }
 
+export async function deleteTransaction(id: number): Promise<void> {
+  await prisma.transaction.delete({ where: { id } });
+}
+
 export async function getTransactions(
   businessId: number,
   from: Date,

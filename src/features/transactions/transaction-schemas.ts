@@ -39,6 +39,10 @@ export const updateTransactionSchema = z
   })
   .refine(hasAmount, { message: HAS_AMOUNT_MESSAGE });
 
+export const deleteTransactionSchema = z.object({
+  id: z.number({ error: "Transaction ID is required" }),
+});
+
 export const saleTransactionSchema = z
   .object({
     cardAmount,

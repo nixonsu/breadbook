@@ -1,5 +1,5 @@
-import { updateTransactionSchema } from "@/src/features/transactions/transaction-schemas";
-import { getTransactions, updateTransaction } from "@/src/features/transactions/transaction-service";
+import { deleteTransactionSchema, updateTransactionSchema } from "@/src/features/transactions/transaction-schemas";
+import { deleteTransaction, getTransactions, updateTransaction } from "@/src/features/transactions/transaction-service";
 import { parseRequestBody } from "@/src/utils/validation";
 
 export async function GET(request: Request): Promise<Response> {
@@ -57,6 +57,28 @@ export async function PATCH(request: Request): Promise<Response> {
     const message =
       error instanceof Error ? error.message : "Failed to update transaction";
     console.error("Failed to update transaction:", error);
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+}
+
+export async function DELETE(request: Request): Promise<Response> {
+  try {
+    const parsed = await parseRequestBody(request, deleteTransactionSchema);
+    if (!parsed.success) return parsed.response;
+
+    await deleteTransaction(parsed.data.id);
+
+    return new Response(
+      JSON.stringify({ message: "Transaction deleted" }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to delete transaction";
+    console.error("Failed to delete transaction:", error);
     return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
