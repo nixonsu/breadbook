@@ -119,6 +119,13 @@ export default function AddIncomePage() {
                 type="text"
                 value={clientSearch}
                 onChange={(e) => setClientSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && filteredClients.length > 0) {
+                    setSelectedClient(filteredClients[0]);
+                    setClientPickerOpen(false);
+                    setClientSearch("");
+                  }
+                }}
                 placeholder="Search clients..."
                 className="flex-1 outline-none text-sm bg-transparent"
               />
