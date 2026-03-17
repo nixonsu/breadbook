@@ -9,6 +9,29 @@ import { PrismaPg } from "@prisma/adapter-pg";
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
+export async function createInterestIncome(
+  businessId: number,
+  date: string | Date,
+  notes: string,
+  cardAmount: number,
+  cashAmount: number,
+): Promise<Transaction> {
+  const transaction = await prisma.transaction.create({
+    data: {
+      business: { connect: { id: businessId } },
+      type: TransactionType.INCOME,
+      category: TransactionCategory.INTEREST,
+      cardAmount,
+      cashAmount,
+      notes,
+      occurredAt: new Date(date),
+      updatedAt: new Date(),
+    },
+  });
+
+  return transaction;
+}
+
 export async function createSale(
   businessId: number,
   clientId: number,

@@ -20,6 +20,7 @@ export async function parseRequestBody<T>(
         JSON.stringify({
           error:
             Object.values(errors.fieldErrors).flat().join("; ") +
+            " " +
             Object.values(errors.formErrors).flat().join("; "),
         }),
         { status: 400, headers: { "Content-Type": "application/json" } },

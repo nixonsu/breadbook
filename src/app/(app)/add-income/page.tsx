@@ -16,11 +16,16 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-const INCOME_TYPE_OPTIONS = ["Sale", "Interest"];
+enum IncomeType {
+  Sale = "Sale",
+  Interest = "Interest",
+}
+
+const INCOME_TYPE_OPTIONS = Object.values(IncomeType);
 
 export default function AddIncomePage() {
   const router = useRouter();
-  const [incomeType, setIncomeType] = useState<string>("");
+  const [incomeType, setIncomeType] = useState<string>(IncomeType.Sale);
   const [cardAmount, setCardAmount] = useState("");
   const [cashAmount, setCashAmount] = useState("");
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
@@ -61,17 +66,31 @@ export default function AddIncomePage() {
     });
   }, [clients, clientSearch]);
 
+  const isInterestSelected = incomeType === IncomeType.Interest;
+
   const handleSubmit = async () => {
-    const res = await fetch(API_ROUTES.SALE, {
+    const route = isInterestSelected
+      ? API_ROUTES.INTEREST_INCOME
+      : API_ROUTES.SALE;
+    const body = isInterestSelected
+      ? {
+          cardAmount: parseFloat(cardAmount) || 0,
+          cashAmount: parseFloat(cashAmount) || 0,
+          date,
+          notes,
+        }
+      : {
+          cardAmount: parseFloat(cardAmount) || 0,
+          cashAmount: parseFloat(cashAmount) || 0,
+          date,
+          notes,
+          clientId: selectedClient?.id,
+        };
+
+    const res = await fetch(route, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        cardAmount: parseFloat(cardAmount) || 0,
-        cashAmount: parseFloat(cashAmount) || 0,
-        date,
-        notes,
-        clientId: selectedClient?.id,
-      }),
+      body: JSON.stringify(body),
     });
     const data = await res.json();
 
@@ -95,84 +114,86 @@ export default function AddIncomePage() {
         placeholder="Select type"
       />
 
-      <div className="relative" ref={pickerRef}>
-        <button
-          type="button"
-          className="flex w-full items-center gap-3 bg-white px-4 py-3 border-black border-2 focus:outline-none focus:shadow-[2px_2px_0px_rgba(0,0,0,1)] cursor-pointer"
-          onClick={() => setClientPickerOpen(!clientPickerOpen)}
-        >
-          <UserIcon size={22} weight="bold" />
-          <span className="flex-1 text-left text-lg border-b-2 border-black pb-0.5 truncate">
-            {selectedClient
-              ? `${selectedClient.firstName} ${selectedClient.lastName}`
-              : "Select client"}
-          </span>
-          <CaretRightIcon size={20} weight="bold" />
-        </button>
+      {!isInterestSelected && (
+        <div className="relative" ref={pickerRef}>
+          <button
+            type="button"
+            className="flex w-full items-center gap-3 bg-white px-4 py-3 border-black border-2 focus:outline-none focus:shadow-[2px_2px_0px_rgba(0,0,0,1)] cursor-pointer"
+            onClick={() => setClientPickerOpen(!clientPickerOpen)}
+          >
+            <UserIcon size={22} weight="bold" />
+            <span className="flex-1 text-left text-lg border-b-2 border-black pb-0.5 truncate">
+              {selectedClient
+                ? `${selectedClient.firstName} ${selectedClient.lastName}`
+                : "Select client"}
+            </span>
+            <CaretRightIcon size={20} weight="bold" />
+          </button>
 
-        {clientPickerOpen && (
-          <div className="absolute left-0 right-0 z-20 mt-2 bg-white border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] max-h-64 flex flex-col">
-            <div className="flex items-center gap-2 px-3 py-2 border-b-2 border-black">
-              <MagnifyingGlassIcon size={18} />
-              <input
-                autoFocus
-                type="text"
-                value={clientSearch}
-                onChange={(e) => setClientSearch(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && filteredClients.length > 0) {
-                    setSelectedClient(filteredClients[0]);
-                    setClientPickerOpen(false);
-                    setClientSearch("");
-                  }
-                }}
-                placeholder="Search clients..."
-                className="flex-1 outline-none text-sm bg-transparent"
-              />
-              {selectedClient && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedClient(null);
-                    setClientSearch("");
-                  }}
-                  className="text-gray-500 hover:text-black"
-                >
-                  <XIcon size={16} weight="bold" />
-                </button>
-              )}
-            </div>
-
-            <div className="overflow-y-auto">
-              {filteredClients.length === 0 ? (
-                <p className="text-center text-sm text-gray-500 py-4">
-                  No clients found
-                </p>
-              ) : (
-                filteredClients.map((client) => (
-                  <button
-                    key={client.id}
-                    type="button"
-                    className={`w-full text-left px-4 py-2.5 text-sm hover:bg-[#B8FF9F] border-b border-gray-200 last:border-b-0 ${
-                      selectedClient?.id === client.id
-                        ? "bg-[#e0ffcf] font-medium"
-                        : ""
-                    }`}
-                    onClick={() => {
-                      setSelectedClient(client);
+          {clientPickerOpen && (
+            <div className="absolute left-0 right-0 z-20 mt-2 bg-white border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] max-h-64 flex flex-col">
+              <div className="flex items-center gap-2 px-3 py-2 border-b-2 border-black">
+                <MagnifyingGlassIcon size={18} />
+                <input
+                  autoFocus
+                  type="text"
+                  value={clientSearch}
+                  onChange={(e) => setClientSearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && filteredClients.length > 0) {
+                      setSelectedClient(filteredClients[0]);
                       setClientPickerOpen(false);
                       setClientSearch("");
+                    }
+                  }}
+                  placeholder="Search clients..."
+                  className="flex-1 outline-none text-sm bg-transparent"
+                />
+                {selectedClient && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedClient(null);
+                      setClientSearch("");
                     }}
+                    className="text-gray-500 hover:text-black"
                   >
-                    {client.firstName} {client.lastName}
+                    <XIcon size={16} weight="bold" />
                   </button>
-                ))
-              )}
+                )}
+              </div>
+
+              <div className="overflow-y-auto">
+                {filteredClients.length === 0 ? (
+                  <p className="text-center text-sm text-gray-500 py-4">
+                    No clients found
+                  </p>
+                ) : (
+                  filteredClients.map((client) => (
+                    <button
+                      key={client.id}
+                      type="button"
+                      className={`w-full text-left px-4 py-2.5 text-sm hover:bg-[#B8FF9F] border-b border-gray-200 last:border-b-0 ${
+                        selectedClient?.id === client.id
+                          ? "bg-[#e0ffcf] font-medium"
+                          : ""
+                      }`}
+                      onClick={() => {
+                        setSelectedClient(client);
+                        setClientPickerOpen(false);
+                        setClientSearch("");
+                      }}
+                    >
+                      {client.firstName} {client.lastName}
+                    </button>
+                  ))
+                )}
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       <div className="flex items-center gap-4">
         <div className="flex-1 flex items-center gap-2">
