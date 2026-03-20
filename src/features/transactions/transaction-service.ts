@@ -166,14 +166,20 @@ export async function getTransactions(
   from: Date,
   to: Date,
 ) {
-  return prisma.transaction.findMany({
+  const rows = await prisma.transaction.findMany({
     where: {
       businessId,
       occurredAt: { gte: from, lte: to },
     },
     include: { client: true },
-    orderBy: [{ occurredAt: "desc" }, { id: "desc" }],
   });
+  rows.sort((a, b) => {
+    const da = a.occurredAt.toISOString().slice(0, 10);
+    const db = b.occurredAt.toISOString().slice(0, 10);
+    if (da !== db) return db.localeCompare(da);
+    return b.id - a.id;
+  });
+  return rows;
 }
 
 export async function createCardToCashConversion(
