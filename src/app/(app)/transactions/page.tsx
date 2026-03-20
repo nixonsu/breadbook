@@ -2,9 +2,11 @@
 
 import Button from "@/src/components/Button";
 import CurrencyInput from "@/src/components/CurrencyInput";
+import FetchContent from "@/src/components/FetchContent";
 import Input from "@/src/components/Input";
 import { showToast } from "@/src/components/Toast";
 import { API_ROUTES } from "@/src/constants/routes";
+import { useFetch } from "@/src/hooks/useFetch";
 import type { Icon } from "@phosphor-icons/react";
 import {
   ArrowsLeftRightIcon,
@@ -16,7 +18,7 @@ import {
   UserIcon,
   XIcon,
 } from "@phosphor-icons/react";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 
 type TransactionDTO = {
   id: number;
@@ -103,8 +105,6 @@ function groupByDate(
 export default function TransactionsPage() {
   const [from, setFrom] = useState(defaultFrom);
   const [to, setTo] = useState(() => toISODate(new Date()));
-  const [transactions, setTransactions] = useState<TransactionDTO[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<TransactionDTO | null>(null);
   const [editing, setEditing] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -160,7 +160,7 @@ export default function TransactionsPage() {
     showToast("Transaction updated");
     setSelected(null);
     setEditing(false);
-    fetchTransactions();
+    refetch();
   };
 
   const handleDelete = async () => {
@@ -181,30 +181,14 @@ export default function TransactionsPage() {
 
       showToast("Transaction deleted");
       closeSelected();
-      fetchTransactions();
+      refetch();
     } finally {
       setDeleting(false);
     }
   };
 
-  const fetchTransactions = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({ from, to });
-      const res = await fetch(`${API_ROUTES.TRANSACTIONS}?${params}`);
-      if (res.ok) {
-        setTransactions(await res.json());
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [from, to]);
-
-  useEffect(() => {
-    fetchTransactions();
-  }, [fetchTransactions]);
-
-  const grouped = groupByDate(transactions);
+  const txUrl = () => `${API_ROUTES.TRANSACTIONS}?${new URLSearchParams({ from, to })}`;
+  const { data: transactions, loading, refetch } = useFetch<TransactionDTO[]>(txUrl);
 
   return (
     <div className="flex flex-col gap-5">
@@ -232,71 +216,74 @@ export default function TransactionsPage() {
         </div>
       </div>
 
-      {/* Transaction list */}
-      {loading ? (
-        <p className="text-center text-gray-500 py-8">Loading...</p>
-      ) : transactions.length === 0 ? (
-        <p className="text-center text-gray-500 py-8">
-          No transactions found for this period.
-        </p>
-      ) : (
-        <div className="flex flex-col gap-6">
-          {grouped.map(([date, txs]) => (
-            <div key={date}>
-              <p className="text-sm font-bold italic text-gray-600 mb-2">
-                {formatDateHeading(date)}
-              </p>
+      <FetchContent
+        data={transactions}
+        loading={loading}
+        hasData={(txs) => txs.length > 0}
+        emptyMessage="No transactions found for this period."
+      >
+        {(txs) => {
+          const grouped = groupByDate(txs);
+          return (
+            <div className="flex flex-col gap-6">
+              {grouped.map(([date, dateTxs]) => (
+                <div key={date}>
+                  <p className="text-sm font-bold italic text-gray-600 mb-2">
+                    {formatDateHeading(date)}
+                  </p>
 
-              <div className="border-2 border-black bg-white shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-                {txs.map((tx, i) => {
-                  const total = totalAmount(tx);
-                  const isIncome = tx.type === "INCOME";
+                  <div className="border-2 border-black bg-white shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                    {dateTxs.map((tx, i) => {
+                      const total = totalAmount(tx);
+                      const isIncome = tx.type === "INCOME";
 
-                  return (
-                    <button
-                      key={tx.id}
-                      type="button"
-                      onClick={() => openSelected(tx)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer hover:bg-gray-50 active:bg-gray-100 ${
-                        i < txs.length - 1 ? "border-b-2 border-black" : ""
-                      }`}
-                    >
-                      <div
-                        className={`shrink-0 w-10 h-10 border-2 border-black flex items-center justify-center ${CATEGORY_ICON_BG[tx.category]}`}
-                      >
-                        {(() => {
-                          const Icon = CATEGORY_ICONS[tx.category];
-                          return <Icon size={22} weight="bold" />;
-                        })()}
-                      </div>
+                      return (
+                        <button
+                          key={tx.id}
+                          type="button"
+                          onClick={() => openSelected(tx)}
+                          className={`w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer hover:bg-gray-50 active:bg-gray-100 ${
+                            i < dateTxs.length - 1 ? "border-b-2 border-black" : ""
+                          }`}
+                        >
+                          <div
+                            className={`shrink-0 w-10 h-10 border-2 border-black flex items-center justify-center ${CATEGORY_ICON_BG[tx.category]}`}
+                          >
+                            {(() => {
+                              const Icon = CATEGORY_ICONS[tx.category];
+                              return <Icon size={22} weight="bold" />;
+                            })()}
+                          </div>
 
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bold text-base truncate">
-                          {tx.category === "SALE" && tx.client
-                            ? `${tx.client.firstName} ${tx.client.lastName}`
-                            : CATEGORY_LABELS[tx.category]}
-                        </p>
-                        <p className="text-sm text-gray-500 truncate">
-                          {tx.notes || "No notes"}
-                        </p>
-                      </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-base truncate">
+                              {tx.category === "SALE" && tx.client
+                                ? `${tx.client.firstName} ${tx.client.lastName}`
+                                : CATEGORY_LABELS[tx.category]}
+                            </p>
+                            <p className="text-sm text-gray-500 truncate">
+                              {tx.notes || "No notes"}
+                            </p>
+                          </div>
 
-                      <p
-                        className={`font-bold text-base whitespace-nowrap ${
-                          isIncome ? "text-green-600" : "text-red-600"
-                        }`}
-                      >
-                        {isIncome ? "" : "-"}
-                        {formatCurrency(total)}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
+                          <p
+                            className={`font-bold text-base whitespace-nowrap ${
+                              isIncome ? "text-green-600" : "text-red-600"
+                            }`}
+                          >
+                            {isIncome ? "" : "-"}
+                            {formatCurrency(total)}
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
+          );
+        }}
+      </FetchContent>
 
       {/* Detail modal */}
       {selected && (
