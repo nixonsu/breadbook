@@ -73,7 +73,6 @@ const Select = ({
               className={classNames(
                 "block w-full px-4 py-3 text-center text-base hover:bg-[#B8FF9F] hover:font-medium",
                 { "border-black border-b-2": index < options.length - 1 },
-                { "bg-[#e0ffcf] font-medium": value === option },
               )}
               role="menuitem"
               onClick={() => handleSelect(option)}
