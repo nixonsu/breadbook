@@ -332,7 +332,7 @@ export default function TransactionsPage() {
           if (filtered.length === 0) {
             return (
               <p className="text-center text-gray-500 py-8">
-                No transactions match the selected filters.
+                Nuffing here :o Were you expecting something? Maybe try a different period?
               </p>
             );
           }
