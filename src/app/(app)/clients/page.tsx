@@ -5,15 +5,18 @@ import FetchContent from "@/src/components/FetchContent";
 import IconButton from "@/src/components/IconButton";
 import Input from "@/src/components/Input";
 import { showToast } from "@/src/components/Toast";
-import { API_ROUTES } from "@/src/constants/routes";
+import { API_ROUTES, UI_ROUTES } from "@/src/constants/routes";
 import { SyncResult } from "@/src/features/clients/client-service";
 import { useFetch } from "@/src/hooks/useFetch";
 import { ArrowsClockwiseIcon } from "@phosphor-icons/react";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 export default function ClientsPage() {
   const [search, setSearch] = useState("");
   const [syncing, setSyncing] = useState(false);
+
+  const router = useRouter();
 
   const {
     data: clients,
@@ -96,7 +99,13 @@ export default function ClientsPage() {
               const showSeparator = letter !== prevLetter;
 
               return (
-                <div key={client.id}>
+                <div
+                  key={client.id}
+                  onClick={() =>
+                    router.push(`${UI_ROUTES.ADD_INCOME}?clientId=${client.id}`)
+                  }
+                  className="cursor-pointer"
+                >
                   {showSeparator && (
                     <div className="mt-4 mb-1">
                       <span className="text-sm font-bold text-gray-500">

@@ -14,8 +14,8 @@ import {
   XIcon,
 } from "@phosphor-icons/react";
 import classNames from "classnames";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 
 enum IncomeType {
   Sale = "Sale",
@@ -39,6 +39,9 @@ export default function AddIncomePage() {
   const [clientSearch, setClientSearch] = useState("");
   const pickerRef = useRef<HTMLDivElement>(null);
 
+  const searchParams = useSearchParams();
+  const clientId = searchParams.get("clientId");
+
   useEffect(() => {
     async function loadClients() {
       const res = await fetch(API_ROUTES.CLIENTS);
@@ -47,6 +50,13 @@ export default function AddIncomePage() {
     }
     loadClients();
   }, []);
+
+  useEffect(() => {
+    const match = clients.find((c) => c.id === parseInt(clientId as string));
+    if (match) {
+      startTransition(() => setSelectedClient(match));
+    }
+  }, [clientId, clients]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
