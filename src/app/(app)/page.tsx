@@ -86,7 +86,13 @@ export default function Home() {
       ) : null}
 
       <FetchContent data={overview} loading={loading}>
-        {(data) => (
+        {(data) => {
+          const expectedTotalBalance =
+            data.expectedCardBalance + data.expectedCashBalance;
+          const actualTotalBalance =
+            data.actualCardBalance + data.actualCashBalance;
+
+          return (
           <div className="flex flex-col gap-5">
             {/* Period selector */}
             <div className="grid grid-cols-5 border-2 border-black">
@@ -175,18 +181,28 @@ export default function Home() {
                     </button>
                   </div>
 
+                  <div className="grid grid-cols-3 items-center px-4 py-3 border-b-2 border-black bg-gray-50">
+                    <span className="text-sm font-bold">Total</span>
+                    <span className="text-sm font-bold text-center">
+                      {fmt(expectedTotalBalance)}
+                    </span>
+                    <span className="text-sm font-bold text-center">
+                      {fmt(actualTotalBalance)}
+                    </span>
+                  </div>
+
                   <div className="flex items-center justify-between px-4 py-3">
                     <span className="text-sm font-bold">Variance</span>
                     <span
                       className={`text-base font-bold ${
-                        data.variance === 0
+                        data.variance >= 0
                           ? "text-green-600"
                           : Math.abs(data.variance) < 10
                             ? "text-yellow-600"
                             : "text-red-600"
                       }`}
                     >
-                      {data.variance >= 0 ? "" : "-"}
+                      {data.variance >= 0 ? "+" : "-"}
                       {fmt(data.variance)}
                     </span>
                   </div>
@@ -284,7 +300,8 @@ export default function Home() {
               </section>
             </div>
           </div>
-        )}
+          );
+        }}
       </FetchContent>
     </div>
   );
