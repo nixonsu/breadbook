@@ -11,6 +11,7 @@ import {
   UserIcon,
   XIcon,
 } from "@phosphor-icons/react";
+import { UI_ROUTES } from "@/src/constants/routes";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
@@ -173,8 +174,8 @@ export default function Navigation() {
         </NavLink>
 
         <NavLink
-          href="/statistics"
-          active={pathname === "/statistics"}
+          href={UI_ROUTES.STATISTICS}
+          active={pathname === UI_ROUTES.STATISTICS}
           onNavigate={fanoutOpen ? closeFanout : undefined}
         >
           <ChartLineIcon weight="fill" size={ICON_SIZE} />

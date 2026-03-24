@@ -12,7 +12,8 @@ export const API_ROUTES = {
   CONVERSION_CASH_TO_CARD: "/api/conversions/cash-to-card",
   CONVERSION_CARD_TO_CASH: "/api/conversions/card-to-cash",
   TRANSACTIONS: "/api/transactions",
-  OVERVIEW: "/api/overview",
+  BALANCE_SUMMARY: "/api/balance-summary",
+  STATISTICS: "/api/statistics",
 } as const;
 
 export const UI_ROUTES = {
@@ -25,4 +26,5 @@ export const UI_ROUTES = {
   TRANSACTIONS: "/transactions",
   CLIENTS: "/clients",
   SETTINGS: "/settings",
+  STATISTICS: "/statistics",
 } as const;

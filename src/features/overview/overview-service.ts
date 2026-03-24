@@ -9,7 +9,15 @@ import { PrismaPg } from "@prisma/adapter-pg";
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-export interface Overview {
+export interface BalanceSummary {
+  expectedCardBalance: number;
+  expectedCashBalance: number;
+  actualCardBalance: number;
+  actualCashBalance: number;
+  variance: number;
+}
+
+export interface PeriodStatistics {
   totalCardIn: number;
   totalCardOut: number;
   totalCashIn: number;
@@ -17,12 +25,6 @@ export interface Overview {
   totalMoneyIn: number;
   totalMoneyOut: number;
   netProfit: number;
-
-  expectedCardBalance: number;
-  expectedCashBalance: number;
-  actualCardBalance: number;
-  actualCashBalance: number;
-  variance: number;
 
   totalSalesRevenue: number;
   totalBusinessExpenses: number;
@@ -34,35 +36,15 @@ export interface Overview {
   uniqueClientCount: number;
 }
 
-export async function getOverview(
+export async function getBalanceSummary(
   businessId: number,
-  from?: Date,
-  to?: Date,
-): Promise<Overview> {
-  const dateFilter =
-    from && to ? { gte: from, lte: to } : from ? { gte: from } : undefined;
-
-  const periodWhere = {
-    businessId,
-    ...(dateFilter ? { occurredAt: dateFilter } : {}),
-  };
-
+): Promise<BalanceSummary> {
   const allTimeWhere = { businessId };
 
-  const [periodAggregates, allTimeAggregates, actualBalances, periodStats] =
-    await Promise.all([
-      aggregateByTypeAndCategory(periodWhere),
-      aggregateByTypeAndCategory(allTimeWhere),
-      getActualBalances(businessId),
-      getStatistics(periodWhere),
-    ]);
-
-  const totalCardIn = periodAggregates.incomeCard;
-  const totalCardOut = periodAggregates.expenseCard;
-  const totalCashIn = periodAggregates.incomeCash;
-  const totalCashOut = periodAggregates.expenseCash;
-  const totalMoneyIn = totalCardIn + totalCashIn;
-  const totalMoneyOut = totalCardOut + totalCashOut;
+  const [allTimeAggregates, actualBalances] = await Promise.all([
+    aggregateByTypeAndCategory(allTimeWhere),
+    getActualBalances(businessId),
+  ]);
 
   const expectedCardBalance =
     allTimeAggregates.incomeCard - allTimeAggregates.expenseCard;
@@ -74,6 +56,37 @@ export async function getOverview(
     actualBalances.actualCardBalance + actualBalances.actualCashBalance;
 
   return {
+    expectedCardBalance,
+    expectedCashBalance,
+    actualCardBalance: actualBalances.actualCardBalance,
+    actualCashBalance: actualBalances.actualCashBalance,
+    variance: actualTotal - expectedTotal,
+  };
+}
+
+export async function getPeriodStatistics(
+  businessId: number,
+  from: Date,
+  to: Date,
+): Promise<PeriodStatistics> {
+  const periodWhere = {
+    businessId,
+    occurredAt: { gte: from, lte: to },
+  };
+
+  const [periodAggregates, periodStats] = await Promise.all([
+    aggregateByTypeAndCategory(periodWhere),
+    getStatistics(periodWhere),
+  ]);
+
+  const totalCardIn = periodAggregates.incomeCard;
+  const totalCardOut = periodAggregates.expenseCard;
+  const totalCashIn = periodAggregates.incomeCash;
+  const totalCashOut = periodAggregates.expenseCash;
+  const totalMoneyIn = totalCardIn + totalCashIn;
+  const totalMoneyOut = totalCardOut + totalCashOut;
+
+  return {
     totalCardIn,
     totalCardOut,
     totalCashIn,
@@ -81,12 +94,6 @@ export async function getOverview(
     totalMoneyIn,
     totalMoneyOut,
     netProfit: totalMoneyIn - totalMoneyOut,
-
-    expectedCardBalance,
-    expectedCashBalance,
-    actualCardBalance: actualBalances.actualCardBalance,
-    actualCashBalance: actualBalances.actualCashBalance,
-    variance: actualTotal - expectedTotal,
 
     totalSalesRevenue: periodAggregates.salesRevenue,
     totalBusinessExpenses: periodAggregates.businessExpenses,
