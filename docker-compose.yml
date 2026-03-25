@@ -1,23 +1,4 @@
 services:
-  app:
-    build:
-      context: .
-    image: financee-app
-    container_name: app
-    depends_on:
-      - db
-    environment:
-      NODE_ENV: production
-      DATABASE_URL: postgresql://postgres:password@db:5432/financee-db?schema=public
-      PORT: "3000"
-    ports:
-      - "3000:3000"
-    # Playwright/Chromium: tiny init as PID 1 reaps browser child processes (avoids zombies)
-    init: true
-    # Playwright/Chromium: use host IPC so /dev/shm is large enough; default container shm is tiny
-    ipc: host
-    restart: unless-stopped
-
   db:
     image: postgres:16
     container_name: db
