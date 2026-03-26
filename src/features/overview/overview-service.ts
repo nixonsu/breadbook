@@ -36,34 +36,6 @@ export interface PeriodStatistics {
   uniqueClientCount: number;
 }
 
-export async function getBalanceSummary(
-  businessId: number,
-): Promise<BalanceSummary> {
-  const allTimeWhere = { businessId };
-
-  const [allTimeAggregates, actualBalances] = await Promise.all([
-    aggregateByTypeAndCategory(allTimeWhere),
-    getActualBalances(businessId),
-  ]);
-
-  const expectedCardBalance =
-    allTimeAggregates.incomeCard - allTimeAggregates.expenseCard;
-  const expectedCashBalance =
-    allTimeAggregates.incomeCash - allTimeAggregates.expenseCash;
-
-  const expectedTotal = expectedCardBalance + expectedCashBalance;
-  const actualTotal =
-    actualBalances.actualCardBalance + actualBalances.actualCashBalance;
-
-  return {
-    expectedCardBalance,
-    expectedCashBalance,
-    actualCardBalance: actualBalances.actualCardBalance,
-    actualCashBalance: actualBalances.actualCashBalance,
-    variance: actualTotal - expectedTotal,
-  };
-}
-
 export async function getPeriodStatistics(
   businessId: number,
   from: Date,

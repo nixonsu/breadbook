@@ -2,12 +2,75 @@ import {
   CardBalanceSnapshot,
   CashBalanceSnapshot,
   PrismaClient,
+  TransactionType,
 } from "@/generated/prisma/client";
-import { Balances } from "@/src/features/balances/balances";
+import {
+  Balances,
+  CurrentBalanceSummary,
+} from "@/src/features/balances/balances";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
+
+export async function getCurrentBalances(
+  businessId: number,
+): Promise<CurrentBalanceSummary> {
+  const lastClose = await prisma.reconciliation.findFirstOrThrow({
+    where: {
+      businessId: businessId,
+    },
+    orderBy: {
+      endPeriod: "desc",
+    },
+  });
+
+  const transactions = await prisma.transaction.findMany({
+    where: {
+      businessId: businessId,
+      occurredAt: { gt: lastClose.endPeriod },
+    },
+  });
+
+  const totalCashIn = transactions
+    .filter((t) => t.type === TransactionType.INCOME)
+    .reduce((acc, t) => acc + t.cashAmount.toNumber(), 0);
+  const totalCashOut = transactions
+    .filter((t) => t.type === TransactionType.EXPENSE)
+    .reduce((acc, t) => acc + t.cashAmount.toNumber(), 0);
+  const totalCardIn = transactions
+    .filter((t) => t.type === TransactionType.INCOME)
+    .reduce((acc, t) => acc + t.cardAmount.toNumber(), 0);
+  const totalCardOut = transactions
+    .filter((t) => t.type === TransactionType.EXPENSE)
+    .reduce((acc, t) => acc + t.cardAmount.toNumber(), 0);
+
+  const openingCashBalance = lastClose.actualCash.toNumber();
+  const openingCardBalance = lastClose.actualCard.toNumber();
+
+  const expectedCashBalance = openingCashBalance + totalCashIn - totalCashOut;
+  const expectedCardBalance = openingCardBalance + totalCardIn - totalCardOut;
+
+  const actualBalances = await getBalances(businessId);
+
+  const actualCashBalance = actualBalances.cashBalance.total;
+  const actualCardBalance = actualBalances.cardBalance.total;
+
+  return {
+    from: lastClose.startPeriod,
+    to: lastClose.endPeriod,
+    expectedCashBalance: expectedCashBalance,
+    expectedCardBalance: expectedCardBalance,
+    totalExpectedBalance: expectedCashBalance + expectedCardBalance,
+    actualCashBalance: actualCashBalance,
+    actualCardBalance: actualCardBalance,
+    totalActualBalance: actualCashBalance + actualCardBalance,
+    variance:
+      actualCashBalance +
+      actualCardBalance -
+      (expectedCashBalance + expectedCardBalance),
+  };
+}
 
 export async function updateCardBalance(businessId: number, total: number) {
   if (isNaN(total)) {

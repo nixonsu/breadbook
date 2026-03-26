@@ -12,3 +12,15 @@ export interface Balances {
   };
   variance: number;
 }
+
+export interface CurrentBalanceSummary {
+  from: Date;
+  to: Date;
+  expectedCashBalance: number;
+  expectedCardBalance: number;
+  totalExpectedBalance: number;
+  actualCashBalance: number;
+  actualCardBalance: number;
+  totalActualBalance: number;
+  variance: number;
+}
