@@ -16,6 +16,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover", // important for iPhone notch safe-area
+  colorScheme: "light",
 };
 
 export default function RootLayout({

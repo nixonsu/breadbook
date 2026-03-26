@@ -1,7 +1,19 @@
 @import "tailwindcss";
 
+/*
+ * Studio Vaia — single source of truth for brand hues.
+ * Ramps below are tuned for interactive states: 200 hover base, 300 default, 400 pressed.
+ */
 :root {
-  --background: #ffffff;
+  --vaia-tulips: #e37083;
+  --vaia-magnolia: #f49aa2;
+  --vaia-daffodils: #fccd86;
+  --vaia-meadow: #a8bf8a;
+  --vaia-clear-sky: #89b7c2;
+  --vaia-ink: #1a1718;
+
+  /* Warm paper — a touch more Magnolia so the shell feels sunnier */
+  --background: color-mix(in srgb, var(--vaia-magnolia) 9%, white);
   --foreground: #171717;
 }
 
@@ -9,13 +21,81 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-public-sans: var(--font-public-sans);
+
+  /* Accent ramps — another step up in chroma */
+  --color-cyan-100: color-mix(in srgb, var(--vaia-clear-sky) 50%, white);
+  --color-cyan-200: color-mix(in srgb, var(--vaia-clear-sky) 72%, white);
+  --color-cyan-300: var(--vaia-clear-sky);
+  --color-cyan-400: color-mix(in srgb, var(--vaia-clear-sky) 88%, var(--vaia-ink));
+  --color-cyan-700: color-mix(in srgb, var(--vaia-clear-sky) 68%, var(--vaia-ink));
+
+  /* Violet: deeper Clear Sky (cool accent) */
+  --color-violet-100: color-mix(in srgb, var(--vaia-clear-sky) 44%, white);
+  --color-violet-200: color-mix(in srgb, var(--vaia-clear-sky) 62%, white);
+  --color-violet-300: color-mix(in srgb, var(--vaia-clear-sky) 82%, white);
+  --color-violet-400: color-mix(in srgb, var(--vaia-clear-sky) 70%, var(--vaia-ink));
+
+  --color-pink-100: color-mix(in srgb, var(--vaia-magnolia) 52%, white);
+  --color-pink-200: color-mix(in srgb, var(--vaia-magnolia) 68%, white);
+  --color-pink-300: var(--vaia-magnolia);
+  --color-pink-400: color-mix(in srgb, var(--vaia-magnolia) 88%, var(--vaia-ink));
+
+  --color-red-100: color-mix(in srgb, var(--vaia-tulips) 52%, white);
+  --color-red-200: color-mix(in srgb, var(--vaia-tulips) 70%, white);
+  --color-red-300: var(--vaia-tulips);
+  --color-red-400: color-mix(in srgb, var(--vaia-tulips) 88%, var(--vaia-ink));
+
+  --color-yellow-100: color-mix(in srgb, var(--vaia-daffodils) 55%, white);
+  --color-yellow-200: color-mix(in srgb, var(--vaia-daffodils) 76%, white);
+  --color-yellow-300: var(--vaia-daffodils);
+  --color-yellow-400: color-mix(in srgb, var(--vaia-daffodils) 90%, var(--vaia-ink));
+
+  /* Orange: deeper Daffodils (distinct from yellow) */
+  --color-orange-200: color-mix(in srgb, var(--vaia-daffodils) 64%, white);
+  --color-orange-300: color-mix(in srgb, var(--vaia-daffodils) 76%, var(--vaia-ink));
+  --color-orange-400: color-mix(in srgb, var(--vaia-daffodils) 60%, var(--vaia-ink));
+
+  --color-lime-100: color-mix(in srgb, var(--vaia-meadow) 56%, white);
+  --color-lime-200: color-mix(in srgb, var(--vaia-meadow) 74%, white);
+  --color-lime-300: var(--vaia-meadow);
+  --color-lime-400: color-mix(in srgb, var(--vaia-meadow) 86%, var(--vaia-ink));
+
+  /* Semantic money / status text — closer to full swatch strength */
+  --color-green-100: color-mix(in srgb, var(--vaia-meadow) 52%, white);
+  --color-green-600: color-mix(in srgb, var(--vaia-meadow) 94%, var(--vaia-ink));
+  --color-green-700: color-mix(in srgb, var(--vaia-meadow) 86%, var(--vaia-ink));
+
+  --color-red-600: color-mix(in srgb, var(--vaia-tulips) 92%, var(--vaia-ink));
+  --color-red-700: color-mix(in srgb, var(--vaia-tulips) 82%, var(--vaia-ink));
+
+  --color-yellow-600: color-mix(in srgb, var(--vaia-daffodils) 88%, var(--vaia-ink));
+
+  --color-blue-100: color-mix(in srgb, var(--vaia-clear-sky) 52%, white);
+  --color-blue-200: color-mix(in srgb, var(--vaia-clear-sky) 68%, white);
+  --color-blue-300: color-mix(in srgb, var(--vaia-clear-sky) 84%, white);
+
+  /* Neutrals — keep a hint of sky but stay airy */
+  --color-gray-50: color-mix(in srgb, var(--vaia-clear-sky) 3%, var(--background));
+  --color-gray-100: color-mix(in srgb, var(--vaia-clear-sky) 5%, white);
+  --color-gray-200: color-mix(in srgb, var(--vaia-clear-sky) 8%, white);
+  --color-gray-300: color-mix(in srgb, var(--vaia-clear-sky) 11%, white);
+  --color-gray-400: color-mix(in srgb, var(--vaia-clear-sky) 22%, var(--foreground));
+  --color-gray-500: color-mix(in srgb, var(--vaia-clear-sky) 11%, var(--foreground));
+  --color-gray-600: color-mix(in srgb, var(--vaia-clear-sky) 6%, var(--foreground));
+
+  --color-slate-500: color-mix(in srgb, var(--vaia-clear-sky) 12%, var(--foreground));
+
+  /* Disabled — clearer sky tint */
+  --color-disabled-border: color-mix(in srgb, var(--foreground) 35%, white);
+  --color-disabled-bg: color-mix(in srgb, var(--vaia-clear-sky) 32%, white);
+  --color-disabled-fg: color-mix(in srgb, var(--foreground) 45%, white);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* `only` prevents the UA from applying automatic darkening when OS theme is dark */
+html {
+  color-scheme: light only;
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
 html,
@@ -31,7 +111,7 @@ body {
 }
 
 dialog::backdrop {
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.5);
 }
 
 @keyframes slide-up {

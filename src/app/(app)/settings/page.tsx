@@ -5,7 +5,7 @@ export default function SettingsPage() {
     <div>
       <h1 className="text-2xl font-bold">Settings</h1>
       <br />
-      <p className="text-gray-600 dark:text-gray-400">Nuffing here yet 😜</p>
+      <p className="text-gray-600">Nuffing here yet 😜</p>
     </div>
   );
 }

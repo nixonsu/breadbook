@@ -26,8 +26,8 @@ const Button = ({
       type={type}
       onClick={onClick}
       className={classNames(
-        "border-black border-2",
-        "cursor-pointer",
+        "border-2",
+        !disabled && "cursor-pointer border-black",
 
         {
           "bg-violet-200 hover:bg-violet-300 active:bg-violet-400":
@@ -64,7 +64,7 @@ const Button = ({
         { "h-12 px-5 hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]": size === "md" },
         { "h-14 px-5 hover:shadow-[4px_4px_0px_rgba(0,0,0,1)]": size === "lg" },
         {
-          "border-[#727272] bg-[#D4D4D4] text-[#676767] hover:bg-[#D4D4D4] hover:shadow-none active:bg-[#D4D4D4]":
+          "cursor-not-allowed border-disabled bg-disabled text-disabled-fg hover:bg-disabled hover:shadow-none active:bg-disabled":
             disabled,
         },
         className,

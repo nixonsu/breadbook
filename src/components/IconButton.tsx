@@ -22,7 +22,8 @@ const IconButton = ({
   return (
     <button
       className={classNames(
-        "border-black border-2",
+        "border-2",
+        !disabled && "cursor-pointer border-black",
         {
           "bg-violet-200 hover:bg-violet-300 active:bg-violet-400":
             color === "violet" && !disabled,
@@ -67,7 +68,7 @@ const IconButton = ({
         { "rounded-md": rounded === "md" },
         { "rounded-full": rounded === "full" },
         {
-          "border-[#727272] bg-[#D4D4D4] text-[#676767] hover:bg-[#D4D4D4] hover:shadow-none active:bg-[#D4D4D4]":
+          "cursor-not-allowed border-disabled bg-disabled text-disabled-fg hover:bg-disabled hover:shadow-none active:bg-disabled":
             disabled,
         },
         className,

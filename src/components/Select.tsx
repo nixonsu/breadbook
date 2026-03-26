@@ -71,7 +71,7 @@ const Select = ({
               key={option}
               type="button"
               className={classNames(
-                "block w-full px-4 py-3 text-center text-base hover:bg-[#B8FF9F] hover:font-medium",
+                "block w-full px-4 py-3 text-center text-base hover:bg-lime-200 hover:font-medium",
                 { "border-black border-b-2": index < options.length - 1 },
               )}
               role="menuitem"

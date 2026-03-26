@@ -6,7 +6,7 @@ export default function Spinner() {
       <ArrowClockwiseIcon
         size={36}
         weight="bold"
-        className="animate-spin"
+        className="animate-spin text-cyan-400"
       />
     </div>
   );

@@ -290,9 +290,9 @@ export default function Home() {
                 return (
                   <div
                     key={r.id}
-                    className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 px-4 py-3 border-b-2 border-black last:border-b-0"
+                    className="grid grid-cols-[1fr_auto] gap-x-3 gap-y-1 items-center px-4 py-3 border-b-2 border-black last:border-b-0"
                   >
-                    <div className="text-sm">
+                    <div className="min-w-0 text-sm">
                       <p className="font-semibold">
                         {formatYmdAu(r.startPeriod)} –{" "}
                         {formatYmdAu(r.endPeriod)}
@@ -305,7 +305,7 @@ export default function Home() {
                       </p>
                     </div>
                     <span
-                      className={`text-sm font-bold sm:text-right self-center ${varianceClass(v)}`}
+                      className={`shrink-0 text-sm font-bold text-right tabular-nums ${varianceClass(v)}`}
                     >
                       {v >= 0 ? "+" : "-"}
                       {fmt(v)}

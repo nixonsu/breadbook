@@ -176,7 +176,7 @@ export default function AddIncomePage() {
                       setSelectedClient(null);
                       setClientSearch("");
                     }}
-                    className="text-gray-500 hover:text-black"
+                    className="text-gray-500 hover:text-foreground"
                   >
                     <XIcon size={16} weight="bold" />
                   </button>
@@ -193,9 +193,9 @@ export default function AddIncomePage() {
                     <button
                       key={client.id}
                       type="button"
-                      className={`w-full text-left px-4 py-2.5 text-sm hover:bg-[#B8FF9F] border-b border-gray-200 last:border-b-0 ${
+                      className={`w-full text-left px-4 py-2.5 text-sm hover:bg-lime-200 border-b border-gray-200 last:border-b-0 ${
                         selectedClient?.id === client.id
-                          ? "bg-[#e0ffcf] font-medium"
+                          ? "bg-lime-100 font-medium"
                           : ""
                       }`}
                       onClick={() => {

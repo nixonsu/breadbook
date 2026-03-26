@@ -74,7 +74,12 @@ export default function Dialog({
             <button
               type="button"
               disabled={confirmDisabled || isPending}
-              className="h-12 border-black border-2 px-4 bg-[#A6FAFF] hover:bg-[#79F7FF] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] active:bg-[#00E1EF] rounded-full cursor-pointer disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:shadow-none"
+              className={classNames(
+                "h-12 border-2 px-4 rounded-full cursor-pointer disabled:cursor-not-allowed disabled:hover:shadow-none",
+                confirmDisabled || isPending
+                  ? "border-disabled bg-disabled text-disabled-fg"
+                  : "border-black bg-cyan-200 hover:bg-cyan-300 hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] active:bg-cyan-400",
+              )}
               onClick={onConfirm}
             >
               {isPending ? pendingConfirmLabel : confirmLabel}

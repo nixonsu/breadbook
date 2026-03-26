@@ -14,8 +14,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t-3 border-black bg-white">
-        <div className="mx-auto max-w-md px-2 pb-[env(safe-area-inset-bottom)]">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t-3 border-black bg-background">
+        <div className="mx-auto max-w-md pb-[env(safe-area-inset-bottom)]">
           <Navigation />
         </div>
       </nav>

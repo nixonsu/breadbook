@@ -29,7 +29,7 @@ export default function Navigation() {
     <div className="relative w-full">
       <AddTransactionFab ref={fabRef} />
 
-      <div className="relative z-10 mx-auto grid w-full max-w-md grid-cols-5 items-end pb-1 pt-2">
+      <div className="relative z-10 mx-auto grid min-h-14 w-full max-w-md grid-cols-5 items-stretch">
         <NavLink
           href="/transactions"
           active={pathname === "/transactions"}
@@ -84,8 +84,10 @@ function NavLink({
   return (
     <Link
       href={href}
-      className={`flex h-14 flex-col items-center justify-center transition active:scale-95 ${
-        active ? "opacity-100" : "opacity-45"
+      className={`flex h-full min-h-14 w-full flex-col items-center justify-center transition active:scale-[0.98] ${
+        active
+          ? "bg-cyan-100 text-foreground opacity-100"
+          : "opacity-45 hover:bg-cyan-100/50 hover:opacity-90"
       }`}
       onClick={onNavigate}
     >
