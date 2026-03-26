@@ -44,6 +44,7 @@ model Business {
 
   clients              Client[]
   transactions         Transaction[]
+  reconciliations      Reconciliation[]
   cardBalanceSnapshots CardBalanceSnapshot[]
   cashBalanceSnapshots CashBalanceSnapshot[]
 
@@ -117,4 +118,22 @@ model CashBalanceSnapshot {
   @@index([businessId])
   @@index([recordedAt])
   @@map("cash_balance_snapshot")
+}
+
+model Reconciliation {
+  id               Int      @id @default(autoincrement())
+  businessId       Int
+  startPeriod      DateTime
+  endPeriod        DateTime
+  expectedCash     Decimal             @default(0) @db.Decimal(12, 2)
+  expectedCard     Decimal             @default(0) @db.Decimal(12, 2)
+  actualCash       Decimal             @default(0) @db.Decimal(12, 2)
+  actualCard       Decimal             @default(0) @db.Decimal(12, 2)
+  updatedAt        DateTime @default(now())
+
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([updatedAt])
+  @@map("reconciliation")
 }
