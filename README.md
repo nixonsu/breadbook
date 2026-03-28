@@ -1,14 +1,37 @@
-## Getting Started
+# Financee
 
-Run the development server:
+Bookkeeping app for the financially disorganised.
+
+## Setup
+
+1. Use specified node version
+```zsh
+nvm use
+```
+
+2. Install dependencies
+
+```zsh
+yarn
+```
+
+3. Install playwright chromium
+
+```zsh
+npx playwright install --with-deps chromium 
+```
+
+
+## Run
+
 
 ```zsh
 yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Available on [http://localhost:3000](http://localhost:3000)
 
-### Database commands
+## Database commands
 
 **Run migrations**
 
@@ -16,7 +39,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 npx prisma migrate dev --name <migration name>
 ```
 
-**Generate prisma models**
+**Generate prisma models for development**
 
 ```zsh
 cd prisma
