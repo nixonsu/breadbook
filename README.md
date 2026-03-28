@@ -21,6 +21,11 @@ yarn
 npx playwright install --with-deps chromium 
 ```
 
+4. Generate prisma model
+
+```zsh
+npx prisma generate
+```
 
 ## Run
 
