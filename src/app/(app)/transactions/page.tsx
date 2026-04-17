@@ -10,9 +10,9 @@ import { useFetch } from "@/src/hooks/useFetch";
 import {
   TRANSACTIONS_PERIODS,
   formatIsoRangeEnAu,
-  type Period,
   getDefaultFinancialYear,
   periodToDateRange,
+  type Period,
 } from "@/src/utils/period-filter";
 import type { Icon } from "@phosphor-icons/react";
 import {
@@ -368,13 +368,13 @@ export default function TransactionsPage() {
       </div>
 
       {transactions && transactions.length > 0 && (
-        <div className="border-2 border-black bg-white px-4 py-3 shadow-[4px_4px_0px_rgba(0,0,0,1)] flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="border-2 border-black bg-white px-4 py-3 shadow-[4px_4px_0px_0_#000] flex flex-row flex-wrap items-center justify-between gap-x-3 gap-y-1">
           <p className="text-sm font-bold text-gray-700 shrink-0">
             {filteredTransactions.length === 1
               ? `${filteredTransactions.length} transaction`
               : `${filteredTransactions.length} transactions`}
           </p>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-bold sm:justify-end">
+          <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-0.5 text-sm font-bold text-right min-w-0">
             {typeFilter === "INCOME" && (
               <span className="text-green-600 whitespace-nowrap">
                 Total: {formatCurrency(filterTotals.income)}
