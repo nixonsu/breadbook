@@ -62,40 +62,18 @@ async function saveAuthState(context: BrowserContext) {
   console.log("Auth state saved for future sessions");
 }
 
-async function handleInactivityLogout(
-  page: import("playwright").Page,
-): Promise<boolean> {
-  const content = await page.content();
-  if (!content.includes("automatically logged out")) return false;
-
-  console.log("Inactivity logout detected, re-authenticating with email...");
-  const { email } = getCredentials();
-  await page.fill('input[name="email"], input[type="email"]', email);
-  await page.click(
-    'input[type="submit"], button[type="submit"], button:has-text("Log In"), button:has-text("Continue")',
-  );
-  await page.waitForTimeout(3000);
-  console.log("Re-authenticated after inactivity logout");
-  return true;
-}
-
 async function isLoggedIn(context: BrowserContext): Promise<boolean> {
   const page = await context.newPage();
   try {
     await page.goto(ACUITY_CLIENTS_URL, { waitUntil: "domcontentloaded" });
-    await page.waitForTimeout(2000);
 
-    if (await handleInactivityLogout(page)) {
-      await saveAuthState(context);
-      return true;
-    }
+    const loggedOutDueToInactivity = (await page.content()).includes(
+      "You have been automatically logged out after a period of inactivity",
+    );
 
-    const url = page.url();
-    const loggedIn = !url.includes("/login");
-    if (loggedIn) {
-      console.log("Existing session is valid");
-    }
-    return loggedIn;
+    const urlContainsLogin = page.url().includes("/login");
+
+    return !loggedOutDueToInactivity && !urlContainsLogin;
   } finally {
     await page.close();
   }
@@ -195,12 +173,6 @@ async function downloadExport(context: BrowserContext): Promise<string> {
     await page.goto(ACUITY_CLIENTS_URL, { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(2000);
 
-    if (await handleInactivityLogout(page)) {
-      await saveAuthState(context);
-      await page.goto(ACUITY_CLIENTS_URL, { waitUntil: "domcontentloaded" });
-      await page.waitForTimeout(2000);
-    }
-
     console.log("Clicking Export Client List...");
     await page
       .locator(
@@ -233,15 +205,14 @@ export async function downloadClientList(): Promise<string> {
   const { browser, context } = await createContext();
 
   try {
-    // If we have saved auth state, check if it's still valid
     if (hasAuthState()) {
-      const valid = await isLoggedIn(context);
-      if (!valid) {
-        console.log("Session expired, logging in again...");
+      const loggedIn = await isLoggedIn(context);
+      if (!loggedIn) {
+        console.log("Session expired, logging in...");
         await login(context);
       }
     } else {
-      console.log("No saved session, logging in...");
+      console.log("No saved session found, logging in...");
       await login(context);
     }
 
