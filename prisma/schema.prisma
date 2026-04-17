@@ -24,6 +24,16 @@ enum TransactionCategory {
   PERSONAL
 }
 
+enum ClientSyncTrigger {
+  AUTOMATIC
+  MANUAL
+}
+
+enum ClientSyncOutcome {
+  SUCCEEDED
+  FAILED
+}
+
 // Models
 model User {
   id        Int    @id @default(autoincrement())
@@ -47,6 +57,7 @@ model Business {
   reconciliations      Reconciliation[]
   cardBalanceSnapshots CardBalanceSnapshot[]
   cashBalanceSnapshots CashBalanceSnapshot[]
+  clientSyncAttempts   ClientSyncAttempt[]
 
   @@index([userId])
   @@map("business")
@@ -65,6 +76,21 @@ model Client {
 
   @@index([businessId])
   @@map("client")
+}
+
+model ClientSyncAttempt {
+  id          Int                 @id @default(autoincrement())
+  businessId  Int
+  attemptedAt DateTime            @default(now())
+  trigger     ClientSyncTrigger
+  outcome     ClientSyncOutcome
+  errors      Json?
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([attemptedAt])
+  @@map("client_sync_attempt")
 }
 
 model Transaction {
