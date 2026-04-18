@@ -90,7 +90,24 @@ async function login(context: BrowserContext) {
 
     console.log("Entering credentials...");
     await page.fill('input[name="email"], input[type="email"]', email);
+    const currentUrl = page.url();
     await page.click('input[type="submit"]');
+
+    console.log(
+      "Clicked submit, waiting for URL change and DOMContentLoaded...",
+    );
+
+    await page.waitForURL((url) => url.href !== currentUrl, {
+      timeout: 30000,
+    });
+
+    const isLoginPage = page.url().includes("/login");
+
+    if (!isLoginPage) {
+      console.log("Logged in, skipping password input...");
+      await saveAuthState(context);
+      return;
+    }
 
     await page.fill('input[name="password"], input[type="password"]', password);
     await page.click('button[type="submit"]');
