@@ -1,6 +1,6 @@
-# Financee
+# Breadbook
 
-Bookkeeping app for the financially disorganised.
+Bookkeeping app for the financially half-baked.
 
 A small, mobile-first web app for tracking money across **card** and **cash**, closing periods against reconciliations, and keeping clients in sync when you use optional automation.
 
@@ -21,7 +21,7 @@ A small, mobile-first web app for tracking money across **card** and **cash**, c
 
 ## Overview
 
-Financé stores **transactions** with separate **card** and **cash** amounts, categories for income (sale, interest), expense (business, personal), and conversions, optional **client** links for sales, **balance snapshots** for card and cash, and **reconciliations** that capture expected vs actual totals over a period. The home dashboard surfaces balance summaries and supports **closing a period** so you can line your books up with reality.
+Breadbook stores **transactions** with separate **card** and **cash** amounts, categories for income (sale, interest), expense (business, personal), and conversions, optional **client** links for sales, **balance snapshots** for card and cash, and **reconciliations** that capture expected vs actual totals over a period. The home dashboard surfaces balance summaries and supports **closing a period** so you can line your books up with reality.
 
 ## Features
 
@@ -50,7 +50,7 @@ Financé stores **transactions** with separate **card** and **cash** amounts, ca
 - **Yarn**
 - **Docker** (recommended) or any PostgreSQL 16+ instance you can point `DATABASE_URL` at
 
-The repo includes [`docker-compose.yml`](docker-compose.yml) with PostgreSQL 16, database `financee-db`, user `postgres`, password `password`, exposed on port **5432**.
+The repo includes [`docker-compose.yml`](docker-compose.yml) with PostgreSQL 16, database `breadbook-db`, user `postgres`, password `password`, exposed on port **5432**.
 
 ## Getting started
 
@@ -75,7 +75,7 @@ The repo includes [`docker-compose.yml`](docker-compose.yml) with PostgreSQL 16,
 4. Create a `.env` file in the project root with a connection string that matches your database. For the bundled Compose service:
 
    ```env
-   DATABASE_URL="postgresql://postgres:password@localhost:5432/financee-db"
+   DATABASE_URL="postgresql://postgres:password@localhost:5432/breadbook-db"
    ```
 
 5. Apply migrations and generate the Prisma client (run from the **repository root**; [`prisma.config.ts`](prisma.config.ts) wires schema and datasource):
@@ -100,7 +100,7 @@ For production databases, use `npx prisma migrate deploy` instead of `migrate de
 
 ## Authentication
 
-Financé uses **Auth.js v5** (`next-auth@beta`) for authentication. Sign-in is via Google or Microsoft (personal and work/school accounts). Any Google/Microsoft account can sign in; on first login a short onboarding flow collects a name and business name.
+Breadbook uses **Auth.js v5** (`next-auth@beta`) for authentication. Sign-in is via Google or Microsoft (personal and work/school accounts). Any Google/Microsoft account can sign in; on first login a short onboarding flow collects a name and business name.
 
 ### Required env vars
 
@@ -194,13 +194,13 @@ Use this when you want **Acuity client sync** to run automatically (for example 
 3. Add a line. This example runs **`yarn sync:clients`** at **09:00** every day in the **system default timezone** (replace paths and log file):
 
    ```cron
-   0 9 * * * cd /absolute/path/to/financee && /absolute/path/to/yarn sync:clients >> /absolute/path/to/financee-sync.log 2>&1
+   0 9 * * * cd /absolute/path/to/breadbook && /absolute/path/to/yarn sync:clients >> /absolute/path/to/breadbook-sync.log 2>&1
    ```
 
    To force a specific timezone for that job (example: US Pacific), prefix the command:
 
    ```cron
-   0 9 * * * TZ=America/Los_Angeles cd /absolute/path/to/financee && /absolute/path/to/yarn sync:clients >> /absolute/path/to/financee-sync.log 2>&1
+   0 9 * * * TZ=America/Los_Angeles cd /absolute/path/to/breadbook && /absolute/path/to/yarn sync:clients >> /absolute/path/to/breadbook-sync.log 2>&1
    ```
 
 **Verify**

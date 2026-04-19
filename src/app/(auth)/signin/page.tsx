@@ -70,9 +70,13 @@ export default function SignInPage() {
       </Suspense>
 
       <div className="mb-8 text-center">
-        <h1 className="text-4xl font-black tracking-tight">Financé</h1>
+        <div className="flex justify-center mb-4">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/icon.png" alt="Breadbook" width={72} height={72} />
+        </div>
+        <h1 className="text-4xl font-black tracking-tight">Breadbook</h1>
         <p className="mt-2 text-sm text-gray-500 font-medium">
-          Bookkeeping for the financially disorganised.
+          Bookkeeping for the financially half-baked.
         </p>
       </div>
 

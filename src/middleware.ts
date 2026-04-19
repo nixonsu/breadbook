@@ -10,6 +10,8 @@ const PUBLIC_PATHS = [
   /^\/api\/auth(\/.*)?$/,
   /^\/_next(\/.*)?$/,
   /^\/favicon\.ico$/,
+  /^\/icon\.png$/,
+  /^\/apple-icon\.png$/,
   /^\/manifest\.json$/,
   /^\/sw\.js$/,
   /^\/workbox-(.*)\.(js|js\.map)$/,

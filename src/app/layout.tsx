@@ -9,8 +9,12 @@ const publicSans = Public_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Financé",
-  description: "A finance app for the financially disorganized",
+  title: "Breadbook",
+  description: "Breadbook – bookkeeping for the financially half-baked",
+  icons: {
+    icon: "/icon.png",
+    apple: "/apple-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
