@@ -55,7 +55,10 @@ function ErrorHandler() {
         OAuthCallback: "Sign-in was cancelled or failed.",
         AccessDenied: "Access denied.",
       };
-      showToast(messages[error] ?? "Sign-in failed. Please try again.", "error");
+      showToast(
+        messages[error] ?? "Sign-in failed. Please try again.",
+        "error",
+      );
     }
   }, [searchParams]);
 
@@ -88,7 +91,13 @@ export default function SignInPage() {
         <div className="flex flex-col gap-3">
           <button
             type="button"
-            onClick={() => void signIn("google", { callbackUrl: "/" })}
+            onClick={() =>
+              void signIn(
+                "google",
+                { callbackUrl: "/" },
+                { prompt: "select_account" },
+              )
+            }
             className="flex items-center gap-3 w-full h-12 px-4 border-2 border-black bg-cyan-200 hover:bg-cyan-300 active:bg-cyan-400 cursor-pointer font-semibold text-sm transition-colors hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]"
           >
             <GoogleIcon size={20} />
@@ -97,7 +106,9 @@ export default function SignInPage() {
 
           <button
             type="button"
-            onClick={() => void signIn("microsoft-entra-id", { callbackUrl: "/" })}
+            onClick={() =>
+              void signIn("microsoft-entra-id", { callbackUrl: "/" })
+            }
             className="flex items-center gap-3 w-full h-12 px-4 border-2 border-black bg-yellow-200 hover:bg-yellow-300 active:bg-yellow-400 cursor-pointer font-semibold text-sm transition-colors hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]"
           >
             <MicrosoftIcon size={20} />
