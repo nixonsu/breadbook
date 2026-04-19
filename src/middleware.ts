@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 const { auth } = NextAuth(authConfig);
 
 const PUBLIC_PATHS = [
-  /^\/auth(\/.*)?$/,
+  /^\/signin$/,
   /^\/api\/auth(\/.*)?$/,
   /^\/_next(\/.*)?$/,
   /^\/favicon\.ico$/,
@@ -28,7 +28,7 @@ export default auth(function middleware(req: NextAuthRequest) {
 
   // Not authenticated → sign-in page
   if (!session?.user?.id) {
-    const signInUrl = new URL("/auth/signin", req.url);
+    const signInUrl = new URL("/signin", req.url);
     signInUrl.searchParams.set("callbackUrl", req.url);
     return NextResponse.redirect(signInUrl);
   }
