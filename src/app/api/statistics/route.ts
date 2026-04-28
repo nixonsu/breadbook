@@ -1,4 +1,4 @@
-import { getPeriodStatistics } from "@/src/features/overview/overview-service";
+import { getPeriodStatistics } from "@/src/features/statistics/statistics-service";
 import { errorResponse, requireBusinessId } from "@/src/features/auth/session";
 import { endOfUtcDay, startOfUtcDay } from "@/src/utils/query-date-range";
 

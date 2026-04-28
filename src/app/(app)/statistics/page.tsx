@@ -2,7 +2,7 @@
 
 import FetchContent from "@/src/components/FetchContent";
 import { API_ROUTES } from "@/src/constants/routes";
-import type { PeriodStatistics } from "@/src/features/overview/overview-service";
+import type { PeriodStatistics } from "@/src/features/statistics/statistics-service";
 import { useFetch } from "@/src/hooks/useFetch";
 import {
   PERIODS,

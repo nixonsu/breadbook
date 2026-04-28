@@ -1,17 +1,5 @@
-import {
-  CashBalanceSnapshot,
-  TransactionCategory,
-  TransactionType,
-} from "@/generated/prisma/client";
+import { TransactionCategory, TransactionType } from "@/generated/prisma/client";
 import { prisma } from "@/src/lib/prisma";
-
-export interface BalanceSummary {
-  expectedCardBalance: number;
-  expectedCashBalance: number;
-  actualCardBalance: number;
-  actualCashBalance: number;
-  variance: number;
-}
 
 export interface PeriodStatistics {
   totalCardIn: number;
@@ -44,7 +32,7 @@ export async function getPeriodStatistics(
 
   const [periodAggregates, periodStats] = await Promise.all([
     aggregateByTypeAndCategory(periodWhere),
-    getStatistics(periodWhere),
+    getPeriodStats(periodWhere),
   ]);
 
   const totalCardIn = periodAggregates.incomeCard;
@@ -131,39 +119,7 @@ async function aggregateByTypeAndCategory(
   return result;
 }
 
-async function getActualBalances(businessId: number) {
-  const [cardSnapshot, cashSnapshot] = await Promise.all([
-    prisma.cardBalanceSnapshot.findFirst({
-      where: { businessId },
-      orderBy: { recordedAt: "desc" },
-    }),
-    prisma.cashBalanceSnapshot.findFirst({
-      where: { businessId },
-      orderBy: { recordedAt: "desc" },
-    }),
-  ]);
-
-  const actualCardBalance = cardSnapshot?.total.toNumber() ?? 0;
-
-  let actualCashBalance = 0;
-  if (cashSnapshot) {
-    actualCashBalance = calculateCashTotal(cashSnapshot);
-  }
-
-  return { actualCardBalance, actualCashBalance };
-}
-
-function calculateCashTotal(cash: CashBalanceSnapshot): number {
-  return (
-    cash.fives * 5 +
-    cash.tens * 10 +
-    cash.twenties * 20 +
-    cash.fifties * 50 +
-    cash.hundreds * 100
-  );
-}
-
-async function getStatistics(where: Record<string, unknown>) {
+async function getPeriodStats(where: Record<string, unknown>) {
   const [countResult, saleStats, uniqueClients] = await Promise.all([
     prisma.transaction.count({ where }),
     prisma.transaction.aggregate({

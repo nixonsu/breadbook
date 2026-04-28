@@ -6,7 +6,7 @@ import Dialog from "@/src/components/Dialog";
 import FetchContent from "@/src/components/FetchContent";
 import { showToast } from "@/src/components/Toast";
 import { API_ROUTES, UI_ROUTES } from "@/src/constants/routes";
-import type { BalanceSummary } from "@/src/features/overview/overview-service";
+import type { CurrentBalanceSummary } from "@/src/features/balances/balances";
 import { getClosePeriodDates } from "@/src/features/reconciliations/close-period";
 import {
   normalizeReconciliationList,
@@ -58,7 +58,7 @@ export default function Home() {
     data: balanceSummary,
     loading: balanceLoading,
     refetch: refetchBalance,
-  } = useFetch<BalanceSummary>(API_ROUTES.BALANCE_SUMMARY);
+  } = useFetch<CurrentBalanceSummary>(API_ROUTES.BALANCE_SUMMARY);
 
   const {
     data: reconciliationsRaw,
