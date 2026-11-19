@@ -26,15 +26,36 @@ function getCredentials() {
   return { email, password };
 }
 
-function getBackupCode(): string {
-  const code = process.env.ACUITY_BACKUP_CODE;
-  if (!code) {
+function getBackupCodes(): string[] {
+  const raw = process.env.ACUITY_BACKUP_CODES;
+  if (!raw?.trim()) {
     throw new Error(
-      "2FA is required but ACUITY_BACKUP_CODE is not set in your .env file. " +
-        "Generate a backup code from Acuity Scheduling and add it to .env.",
+      "2FA is required but ACUITY_BACKUP_CODES is not set in your .env file. " +
+        "Add a comma-separated list of backup codes from Acuity Scheduling.",
     );
   }
-  return code;
+
+  const codes = raw
+    .split(",")
+    .map((code) => code.trim())
+    .filter((code) => code.length > 0);
+
+  if (codes.length === 0) {
+    throw new Error(
+      "2FA is required but ACUITY_BACKUP_CODES does not contain any backup codes.",
+    );
+  }
+
+  return codes;
+}
+
+function isAuthUrl(url: string): boolean {
+  return (
+    url.includes("/login") ||
+    url.includes("/authenticate") ||
+    url.includes("/two-factor") ||
+    url.includes("/2fa")
+  );
 }
 
 function hasAuthState(): boolean {
@@ -180,7 +201,7 @@ async function login(context: BrowserContext) {
       pageContent.includes("Two-Factor");
 
     if (needs2FA) {
-      console.log("2FA required, using backup code...");
+      console.log("2FA required, trying backup codes...");
       await handle2FA(page);
     }
 
@@ -202,38 +223,69 @@ async function login(context: BrowserContext) {
   }
 }
 
-async function handle2FA(page: import("playwright").Page) {
-  const backupCode = getBackupCode();
-
-  // Look for a link/button to switch to backup code input
-  console.log("Switching to backup code entry...");
+async function openBackupCodeEntry(page: Page) {
   const useAnotherMethodLink = page.locator("text=/Use a different method/i");
-  await useAnotherMethodLink.first().click();
   const backupCodeLink = page.locator("text=/Backup Code/i");
-  await backupCodeLink.first().click();
-  await page.waitForTimeout(1000);
 
-  // Find the backup code input and fill it
+  if (await useAnotherMethodLink.first().isVisible().catch(() => false)) {
+    console.log("Switching to backup code entry...");
+    await useAnotherMethodLink.first().click();
+  }
+
+  if (await backupCodeLink.first().isVisible().catch(() => false)) {
+    await backupCodeLink.first().click();
+    await page.waitForTimeout(1000);
+  }
+}
+
+async function handle2FA(page: Page) {
+  const backupCodes = getBackupCodes();
   const codeInput = page.locator(
     'input[name="code"], input[name="backup_code"], input[name="backupCode"], input[type="text"], input[type="tel"]',
   );
-  await codeInput.first().fill(backupCode);
 
-  // Check "remember this device" if available
-  const rememberCheckbox = page.locator(
-    'input[type="checkbox"][name*="remember"], input[type="checkbox"][id*="remember"], label:has-text("remember") input[type="checkbox"]',
-  );
-  if ((await rememberCheckbox.count()) > 0) {
-    const isChecked = await rememberCheckbox.first().isChecked();
-    if (!isChecked) {
-      await rememberCheckbox.first().check();
-      console.log('Checked "remember this device"');
+  for (const [index, backupCode] of backupCodes.entries()) {
+    console.log(
+      `Trying backup code ${index + 1} of ${backupCodes.length}...`,
+    );
+
+    await openBackupCodeEntry(page);
+
+    if (!(await codeInput.first().isVisible().catch(() => false))) {
+      throw new Error(
+        `Backup code field is not available at ${page.url()} after ${index} failed attempt(s).`,
+      );
     }
+
+    await codeInput.first().fill(backupCode);
+
+    const rememberCheckbox = page.locator(
+      'input[type="checkbox"][name*="remember"], input[type="checkbox"][id*="remember"], label:has-text("remember") input[type="checkbox"]',
+    );
+    if ((await rememberCheckbox.count()) > 0) {
+      const isChecked = await rememberCheckbox.first().isChecked();
+      if (!isChecked) {
+        await rememberCheckbox.first().check();
+        console.log('Checked "remember this device"');
+      }
+    }
+
+    await page.click('button[type="submit"], input[type="submit"]');
+    await page.waitForTimeout(3000);
+
+    if (!isAuthUrl(page.url())) {
+      console.log("2FA completed");
+      return;
+    }
+
+    console.log(
+      `Backup code ${index + 1} of ${backupCodes.length} did not complete login.`,
+    );
   }
 
-  await page.click('button[type="submit"], input[type="submit"]');
-  await page.waitForTimeout(3000);
-  console.log("2FA completed");
+  throw new Error(
+    `Login failed after trying all ${backupCodes.length} backup codes. Still on auth page: ${page.url()}.`,
+  );
 }
 
 async function downloadExport(context: BrowserContext): Promise<string> {

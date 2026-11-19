@@ -150,7 +150,7 @@ If a `user` row already exists in the database with a matching email address, Au
 
 - **`ACUITY_EMAIL`** — Login email
 - **`ACUITY_PASSWORD`** — Login password
-- **`ACUITY_BACKUP_CODE`** — Backup code when 2FA is required
+- **`ACUITY_BACKUP_CODES`** — Comma-separated backup codes when 2FA is required. Sync tries each code and fails when every code fails.
 
 ## Optional Acuity client sync and Playwright
 
@@ -162,7 +162,7 @@ Install the browser once:
 npx playwright install --with-deps chromium
 ```
 
-Ensure `ACUITY_EMAIL`, `ACUITY_PASSWORD`, and `ACUITY_BACKUP_CODE` are set when running sync-related flows. Playwright may persist auth state under `.acuity-auth-state.json` and downloads under `data/` as implemented in the sync code.
+Ensure `ACUITY_EMAIL`, `ACUITY_PASSWORD`, and `ACUITY_BACKUP_CODES` are set when running sync-related flows. Playwright may persist auth state under `.acuity-auth-state.json` and downloads under `data/` as implemented in the sync code.
 
 ## Scheduled client sync (crontab)
 
