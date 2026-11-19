@@ -53,6 +53,14 @@ const CATEGORY_OPTIONS: {
   { value: "CONVERT", label: "Convert" },
 ];
 
+type PaymentMethodFilter = "BOTH" | "CASH" | "CARD";
+
+const METHOD_OPTIONS: { value: PaymentMethodFilter; label: string }[] = [
+  { value: "BOTH", label: "Both" },
+  { value: "CASH", label: "Cash" },
+  { value: "CARD", label: "Card" },
+];
+
 type TransactionDTO = {
   id: number;
   type: "INCOME" | "EXPENSE";
@@ -104,31 +112,51 @@ function formatDateHeading(iso: string): string {
   });
 }
 
-function totalAmount(tx: TransactionDTO): number {
-  return parseFloat(tx.cardAmount) + parseFloat(tx.cashAmount);
+function amountForMethod(
+  tx: TransactionDTO,
+  methodFilter: PaymentMethodFilter,
+): number {
+  const card = parseFloat(tx.cardAmount);
+  const cash = parseFloat(tx.cashAmount);
+  const cardValue = Number.isFinite(card) ? card : 0;
+  const cashValue = Number.isFinite(cash) ? cash : 0;
+  if (methodFilter === "CASH") return cashValue;
+  if (methodFilter === "CARD") return cardValue;
+  return cardValue + cashValue;
+}
+
+function hasAmount(amount: string): boolean {
+  const value = parseFloat(amount);
+  return Number.isFinite(value) && value !== 0;
 }
 
 function filterTransactions(
   txs: TransactionDTO[],
   typeFilter: TransactionType | "ALL",
   categoryFilter: TransactionCategory | "ALL",
+  methodFilter: PaymentMethodFilter,
 ): TransactionDTO[] {
   return txs.filter((tx) => {
     if (typeFilter !== "ALL" && tx.type !== typeFilter) return false;
     if (categoryFilter !== "ALL" && tx.category !== categoryFilter)
       return false;
+    if (methodFilter === "CASH" && !hasAmount(tx.cashAmount)) return false;
+    if (methodFilter === "CARD" && !hasAmount(tx.cardAmount)) return false;
     return true;
   });
 }
 
-function sumIncomeAndExpense(txs: TransactionDTO[]): {
+function sumIncomeAndExpense(
+  txs: TransactionDTO[],
+  methodFilter: PaymentMethodFilter,
+): {
   income: number;
   expense: number;
 } {
   let income = 0;
   let expense = 0;
   for (const tx of txs) {
-    const t = totalAmount(tx);
+    const t = amountForMethod(tx, methodFilter);
     if (tx.type === "INCOME") income += t;
     else expense += t;
   }
@@ -160,6 +188,7 @@ export default function TransactionsPage() {
   const [categoryFilter, setCategoryFilter] = useState<
     TransactionCategory | "ALL"
   >("ALL");
+  const [methodFilter, setMethodFilter] = useState<PaymentMethodFilter>("BOTH");
   const [selected, setSelected] = useState<TransactionDTO | null>(null);
   const [editing, setEditing] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -255,14 +284,19 @@ export default function TransactionsPage() {
   const filteredTransactions = useMemo(
     () =>
       transactions
-        ? filterTransactions(transactions, typeFilter, categoryFilter)
+        ? filterTransactions(
+            transactions,
+            typeFilter,
+            categoryFilter,
+            methodFilter,
+          )
         : [],
-    [transactions, typeFilter, categoryFilter],
+    [transactions, typeFilter, categoryFilter, methodFilter],
   );
 
   const filterTotals = useMemo(
-    () => sumIncomeAndExpense(filteredTransactions),
-    [filteredTransactions],
+    () => sumIncomeAndExpense(filteredTransactions, methodFilter),
+    [filteredTransactions, methodFilter],
   );
 
   const periodRange = useMemo(
@@ -345,6 +379,29 @@ export default function TransactionsPage() {
         ))}
       </div>
 
+      {/* Payment method filter */}
+      <div
+        className="grid border-2 border-black"
+        style={{
+          gridTemplateColumns: `repeat(${METHOD_OPTIONS.length}, minmax(0, 1fr))`,
+        }}
+      >
+        {METHOD_OPTIONS.map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => setMethodFilter(opt.value)}
+            className={`cursor-pointer py-2 text-sm font-bold border-r-2 border-black last:border-r-0 transition-colors ${
+              methodFilter === opt.value
+                ? "bg-cyan-300"
+                : "bg-white hover:bg-gray-50 active:bg-gray-100"
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+
       {/* Category filter */}
       <div
         className={`grid border-2 border-black`}
@@ -417,7 +474,7 @@ export default function TransactionsPage() {
 
                   <div className="border-2 border-black bg-white shadow-[4px_4px_0px_rgba(0,0,0,1)]">
                     {dateTxs.map((tx, i) => {
-                      const total = totalAmount(tx);
+                      const total = amountForMethod(tx, methodFilter);
                       const isIncome = tx.type === "INCOME";
 
                       return (
