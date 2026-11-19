@@ -77,16 +77,34 @@ async function rethrowWithScreenshot(
 async function createContext() {
   const headless = process.env.PLAYWRIGHT_HEADLESS === "false" ? false : true;
 
-  const browser = await chromium.launch({ headless });
+  // Squarespace rejects the default headless fingerprint as a bad password.
+  const browser = await chromium.launch({
+    headless,
+    ignoreDefaultArgs: ["--enable-automation"],
+    args: ["--disable-blink-features=AutomationControlled"],
+  });
   const contextOptions: Parameters<typeof browser.newContext>[0] = {
     acceptDownloads: true,
   };
+
+  if (headless) {
+    const probe = await browser.newContext();
+    const probePage = await probe.newPage();
+    const userAgent = await probePage.evaluate(() => navigator.userAgent);
+    await probe.close();
+    contextOptions.userAgent = userAgent.replace(/HeadlessChrome/g, "Chrome");
+  }
 
   if (hasAuthState()) {
     contextOptions.storageState = AUTH_STATE_PATH;
   }
 
   const context = await browser.newContext(contextOptions);
+  await context.addInitScript(() => {
+    Object.defineProperty(navigator, "webdriver", {
+      get: () => undefined,
+    });
+  });
   return { browser, context };
 }
 
