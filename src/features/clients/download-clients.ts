@@ -14,8 +14,8 @@ const ACUITY_CLIENTS_URL =
   "https://secure.acuityscheduling.com/clients.php?action=importexport";
 
 function getCredentials() {
-  const email = process.env.ACUITY_EMAIL;
-  const password = process.env.ACUITY_PASSWORD;
+  const email = process.env.ACUITY_EMAIL?.trim();
+  const password = process.env.ACUITY_PASSWORD?.trim();
 
   if (!email || !password) {
     throw new Error(
@@ -115,6 +115,45 @@ async function isLoggedIn(context: BrowserContext): Promise<boolean> {
   }
 }
 
+async function submitSquarespaceLogin(page: Page, email: string, password: string) {
+  console.log("Squarespace login page detected, submitting credentials...");
+
+  const emailInput = page.locator(
+    '[data-test="login-email-input"] input[name="email"], input[name="email"][type="email"]',
+  );
+  const passwordInput = page.locator('input[name="password"][type="password"]');
+  const loginButton = page.locator('#login-button, [data-test="login-button"]');
+
+  await emailInput.first().waitFor({ state: "visible", timeout: 15000 });
+  await emailInput.first().fill(email);
+  await passwordInput.first().click();
+  await passwordInput.first().fill(password);
+
+  // Squarespace keeps LOG IN disabled until React sees a password value.
+  await loginButton.first().waitFor({ state: "visible", timeout: 10000 });
+  await page.waitForFunction(() => {
+    const button = document.querySelector<HTMLButtonElement>(
+      "#login-button, [data-test='login-button']",
+    );
+    return !!button && !button.disabled;
+  }, undefined, { timeout: 10000 });
+
+  await loginButton.first().click();
+}
+
+async function submitAcuityPassword(page: Page, password: string) {
+  console.log("Acuity password step detected, submitting password...");
+
+  const passwordInput = page.locator(
+    '#password, [data-testid="password-input"], input[name="password"][type="password"]',
+  );
+  const loginButton = page.locator('#next-button, [data-testid="next-button"]');
+
+  await passwordInput.first().waitFor({ state: "visible", timeout: 10000 });
+  await passwordInput.first().fill(password);
+  await loginButton.first().click();
+}
+
 async function login(context: BrowserContext) {
   const { email, password } = getCredentials();
   const page = await context.newPage();
@@ -124,46 +163,46 @@ async function login(context: BrowserContext) {
     await page.goto(ACUITY_LOGIN_URL, { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(1000);
 
-    const emailInput = page.locator(
-      'input[name="email"], input[type="email"]',
+    // Acuity first step uses #username (name="username"), not name="email".
+    const usernameInput = page.locator(
+      '#username, [data-testid="username-input"], input[name="username"]',
     );
-    const passwordInput = page.locator(
-      'input[name="password"], input[type="password"]',
+    const nextButton = page.locator('#next-button, [data-testid="next-button"]');
+    const acuityPassword = page.locator(
+      '#password-container #password, #password, [data-testid="password-input"]',
     );
-    const submitButton = page.locator(
-      'button[type="submit"], input[type="submit"], button:has-text("Log In"), button:has-text("LOG IN")',
+    const acuityContinue = page.locator("#acuity-continue");
+    const squarespaceLoginButton = page.locator(
+      '#login-button, [data-test="login-button"]',
     );
 
-    const passwordVisible = await passwordInput
-      .first()
-      .isVisible()
-      .catch(() => false);
+    await usernameInput.first().waitFor({ state: "visible", timeout: 15000 });
+    console.log("Entering email on Acuity login...");
+    await usernameInput.first().fill(email);
+    await nextButton.first().click();
 
-    if (passwordVisible) {
-      console.log("Unified login page detected, submitting email and password...");
-      await emailInput.first().fill(email);
-      await passwordInput.first().fill(password);
-      await submitButton.first().click();
+    // After Next, login.js either:
+    // 1) reveals Acuity password on the same page
+    // 2) shows Acuity vs Squarespace chooser
+    // 3) redirects to login.squarespace.com
+    console.log("Waiting for password step or account chooser...");
+    await Promise.race([
+      acuityPassword.first().waitFor({ state: "visible", timeout: 30000 }),
+      acuityContinue.waitFor({ state: "visible", timeout: 30000 }),
+      squarespaceLoginButton.first().waitFor({ state: "visible", timeout: 30000 }),
+    ]);
+
+    if (await acuityContinue.isVisible().catch(() => false)) {
+      // Env vars are Acuity credentials; prefer that path when both exist.
+      console.log("Dual-account chooser detected, continuing with Acuity...");
+      await acuityContinue.click();
+      await acuityPassword.first().waitFor({ state: "visible", timeout: 10000 });
+    }
+
+    if (await squarespaceLoginButton.first().isVisible().catch(() => false)) {
+      await submitSquarespaceLogin(page, email, password);
     } else {
-      console.log("Two-step login page detected, entering email...");
-      await emailInput.first().fill(email);
-      const currentUrl = page.url();
-      await submitButton.first().click();
-
-      console.log("Waiting for password step...");
-      await page.waitForURL((url) => url.href !== currentUrl, {
-        timeout: 30000,
-      });
-
-      if (!page.url().includes("/login")) {
-        console.log("Logged in after email step, skipping password...");
-        await saveAuthState(context);
-        return;
-      }
-
-      console.log("Entering password...");
-      await passwordInput.first().fill(password);
-      await submitButton.first().click();
+      await submitAcuityPassword(page, password);
     }
 
     await page.waitForTimeout(3000);
@@ -188,7 +227,14 @@ async function login(context: BrowserContext) {
     await page.waitForTimeout(2000);
 
     const finalUrl = page.url();
-    if (finalUrl.includes("/login") || finalUrl.includes("/authenticate")) {
+    const finalContent = await page.content();
+    const loginFailed =
+      finalUrl.includes("login.squarespace.com") ||
+      finalUrl.includes("secure.acuityscheduling.com/login") ||
+      finalUrl.includes("/authenticate") ||
+      finalContent.includes("username or password is incorrect");
+
+    if (loginFailed) {
       throw new Error(
         `Login failed - still on auth page: ${finalUrl}. Check your credentials.`,
       );
