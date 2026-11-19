@@ -124,29 +124,48 @@ async function login(context: BrowserContext) {
     await page.goto(ACUITY_LOGIN_URL, { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(1000);
 
-    console.log("Entering credentials...");
-    await page.fill('input[name="email"], input[type="email"]', email);
-    const currentUrl = page.url();
-    await page.click('input[type="submit"]');
-
-    console.log(
-      "Clicked submit, waiting for URL change and DOMContentLoaded...",
+    const emailInput = page.locator(
+      'input[name="email"], input[type="email"]',
+    );
+    const passwordInput = page.locator(
+      'input[name="password"], input[type="password"]',
+    );
+    const submitButton = page.locator(
+      'button[type="submit"], input[type="submit"], button:has-text("Log In"), button:has-text("LOG IN")',
     );
 
-    await page.waitForURL((url) => url.href !== currentUrl, {
-      timeout: 30000,
-    });
+    const passwordVisible = await passwordInput
+      .first()
+      .isVisible()
+      .catch(() => false);
 
-    const isLoginPage = page.url().includes("/login");
+    if (passwordVisible) {
+      console.log("Unified login page detected, submitting email and password...");
+      await emailInput.first().fill(email);
+      await passwordInput.first().fill(password);
+      await submitButton.first().click();
+    } else {
+      console.log("Two-step login page detected, entering email...");
+      await emailInput.first().fill(email);
+      const currentUrl = page.url();
+      await submitButton.first().click();
 
-    if (!isLoginPage) {
-      console.log("Logged in, skipping password input...");
-      await saveAuthState(context);
-      return;
+      console.log("Waiting for password step...");
+      await page.waitForURL((url) => url.href !== currentUrl, {
+        timeout: 30000,
+      });
+
+      if (!page.url().includes("/login")) {
+        console.log("Logged in after email step, skipping password...");
+        await saveAuthState(context);
+        return;
+      }
+
+      console.log("Entering password...");
+      await passwordInput.first().fill(password);
+      await submitButton.first().click();
     }
 
-    await page.fill('input[name="password"], input[type="password"]', password);
-    await page.click('button[type="submit"]');
     await page.waitForTimeout(3000);
 
     const url = page.url();
